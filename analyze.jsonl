@@ -1,0 +1,6 @@
+﻿
+  error - The argument type 'ProviderListenable<AsyncValue<List<AnalyticsData>>>' can't be assigned to the parameter type 'ProviderOrFamily'.  - lib\features\analytics\presentation\pages\analytics_page.dart:82:39 - argument_type_not_assignable
+  error - A value of type 'List<Challenge>' can't be returned from the method 'getAllChallenges' because it has a return type of 'Future<List<Challenge>>' - lib\features\challenges\data\repositories\challenges_repository_impl.dart:14:12 - return_of_invalid_type
+  error - A value of type 'Challenge' can't be returned from the method 'getChallengeById' because it has a return type of 'Future<Challenge>' - lib\features\challenges\data\repositories\challenges_repository_impl.dart:21:12 - return_of_invalid_type
+  error - A value of type 'List<Challenge>' can't be returned from the method 'getActiveChallenges' because it has a return type of 'Future<List<Challenge>>' - lib\features\challenges\data\repositories\challenges_repository_impl.dart:39:12 - return_of_invalid_type
+

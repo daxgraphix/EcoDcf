@@ -1,0 +1,939 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'user_preferences_model.dart';
+
+// **************************************************************************
+// IsarCollectionGenerator
+// **************************************************************************
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+extension GetUserPreferencesModelCollection on Isar {
+  IsarCollection<UserPreferencesModel> get userPreferencesModels =>
+      this.collection();
+}
+
+const UserPreferencesModelSchema = CollectionSchema(
+  name: r'UserPreferencesModel',
+  id: 3603656307210587948,
+  properties: {
+    r'hasCompletedOnboarding': PropertySchema(
+      id: 0,
+      name: r'hasCompletedOnboarding',
+      type: IsarType.bool,
+    ),
+    r'lastSyncTimestamp': PropertySchema(
+      id: 1,
+      name: r'lastSyncTimestamp',
+      type: IsarType.dateTime,
+    ),
+    r'notificationsEnabled': PropertySchema(
+      id: 2,
+      name: r'notificationsEnabled',
+      type: IsarType.bool,
+    ),
+    r'themeMode': PropertySchema(
+      id: 3,
+      name: r'themeMode',
+      type: IsarType.string,
+    ),
+    r'userName': PropertySchema(
+      id: 4,
+      name: r'userName',
+      type: IsarType.string,
+    )
+  },
+  estimateSize: _userPreferencesModelEstimateSize,
+  serialize: _userPreferencesModelSerialize,
+  deserialize: _userPreferencesModelDeserialize,
+  deserializeProp: _userPreferencesModelDeserializeProp,
+  idName: r'id',
+  indexes: {},
+  links: {},
+  embeddedSchemas: {},
+  getId: _userPreferencesModelGetId,
+  getLinks: _userPreferencesModelGetLinks,
+  attach: _userPreferencesModelAttach,
+  version: '3.1.0+1',
+);
+
+int _userPreferencesModelEstimateSize(
+  UserPreferencesModel object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  {
+    final value = object.themeMode;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.userName;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  return bytesCount;
+}
+
+void _userPreferencesModelSerialize(
+  UserPreferencesModel object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeBool(offsets[0], object.hasCompletedOnboarding);
+  writer.writeDateTime(offsets[1], object.lastSyncTimestamp);
+  writer.writeBool(offsets[2], object.notificationsEnabled);
+  writer.writeString(offsets[3], object.themeMode);
+  writer.writeString(offsets[4], object.userName);
+}
+
+UserPreferencesModel _userPreferencesModelDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = UserPreferencesModel();
+  object.hasCompletedOnboarding = reader.readBool(offsets[0]);
+  object.id = id;
+  object.lastSyncTimestamp = reader.readDateTimeOrNull(offsets[1]);
+  object.notificationsEnabled = reader.readBool(offsets[2]);
+  object.themeMode = reader.readStringOrNull(offsets[3]);
+  object.userName = reader.readStringOrNull(offsets[4]);
+  return object;
+}
+
+P _userPreferencesModelDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readBool(offset)) as P;
+    case 1:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 2:
+      return (reader.readBool(offset)) as P;
+    case 3:
+      return (reader.readStringOrNull(offset)) as P;
+    case 4:
+      return (reader.readStringOrNull(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+Id _userPreferencesModelGetId(UserPreferencesModel object) {
+  return object.id;
+}
+
+List<IsarLinkBase<dynamic>> _userPreferencesModelGetLinks(
+    UserPreferencesModel object) {
+  return [];
+}
+
+void _userPreferencesModelAttach(
+    IsarCollection<dynamic> col, Id id, UserPreferencesModel object) {
+  object.id = id;
+}
+
+extension UserPreferencesModelQueryWhereSort
+    on QueryBuilder<UserPreferencesModel, UserPreferencesModel, QWhere> {
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterWhere>
+      anyId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+}
+
+extension UserPreferencesModelQueryWhere
+    on QueryBuilder<UserPreferencesModel, UserPreferencesModel, QWhereClause> {
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterWhereClause>
+      idEqualTo(Id id) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(
+        lower: id,
+        upper: id,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterWhereClause>
+      idNotEqualTo(Id id) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            )
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            )
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterWhereClause>
+      idGreaterThan(Id id, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.greaterThan(lower: id, includeLower: include),
+      );
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterWhereClause>
+      idLessThan(Id id, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.lessThan(upper: id, includeUpper: include),
+      );
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterWhereClause>
+      idBetween(
+    Id lowerId,
+    Id upperId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(
+        lower: lowerId,
+        includeLower: includeLower,
+        upper: upperId,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+}
+
+extension UserPreferencesModelQueryFilter on QueryBuilder<UserPreferencesModel,
+    UserPreferencesModel, QFilterCondition> {
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> hasCompletedOnboardingEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hasCompletedOnboarding',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> idEqualTo(Id value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> idGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> idLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> idBetween(
+    Id lower,
+    Id upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> lastSyncTimestampIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'lastSyncTimestamp',
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> lastSyncTimestampIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'lastSyncTimestamp',
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> lastSyncTimestampEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'lastSyncTimestamp',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> lastSyncTimestampGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'lastSyncTimestamp',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> lastSyncTimestampLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'lastSyncTimestamp',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> lastSyncTimestampBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'lastSyncTimestamp',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> notificationsEnabledEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'notificationsEnabled',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> themeModeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'themeMode',
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> themeModeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'themeMode',
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> themeModeEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> themeModeGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> themeModeLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> themeModeBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'themeMode',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> themeModeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> themeModeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+          QAfterFilterCondition>
+      themeModeContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+          QAfterFilterCondition>
+      themeModeMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'themeMode',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> themeModeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'themeMode',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> themeModeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'themeMode',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> userNameIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'userName',
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> userNameIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'userName',
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> userNameEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'userName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> userNameGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'userName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> userNameLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'userName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> userNameBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'userName',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> userNameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'userName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> userNameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'userName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+          QAfterFilterCondition>
+      userNameContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'userName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+          QAfterFilterCondition>
+      userNameMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'userName',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> userNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'userName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> userNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'userName',
+        value: '',
+      ));
+    });
+  }
+}
+
+extension UserPreferencesModelQueryObject on QueryBuilder<UserPreferencesModel,
+    UserPreferencesModel, QFilterCondition> {}
+
+extension UserPreferencesModelQueryLinks on QueryBuilder<UserPreferencesModel,
+    UserPreferencesModel, QFilterCondition> {}
+
+extension UserPreferencesModelQuerySortBy
+    on QueryBuilder<UserPreferencesModel, UserPreferencesModel, QSortBy> {
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByHasCompletedOnboarding() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hasCompletedOnboarding', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByHasCompletedOnboardingDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hasCompletedOnboarding', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByLastSyncTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastSyncTimestamp', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByLastSyncTimestampDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastSyncTimestamp', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByNotificationsEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationsEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByNotificationsEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationsEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByThemeMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'themeMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByThemeModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'themeMode', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByUserName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByUserNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userName', Sort.desc);
+    });
+  }
+}
+
+extension UserPreferencesModelQuerySortThenBy
+    on QueryBuilder<UserPreferencesModel, UserPreferencesModel, QSortThenBy> {
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByHasCompletedOnboarding() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hasCompletedOnboarding', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByHasCompletedOnboardingDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hasCompletedOnboarding', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenById() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByLastSyncTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastSyncTimestamp', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByLastSyncTimestampDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastSyncTimestamp', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByNotificationsEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationsEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByNotificationsEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notificationsEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByThemeMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'themeMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByThemeModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'themeMode', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByUserName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByUserNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userName', Sort.desc);
+    });
+  }
+}
+
+extension UserPreferencesModelQueryWhereDistinct
+    on QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct> {
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct>
+      distinctByHasCompletedOnboarding() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'hasCompletedOnboarding');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct>
+      distinctByLastSyncTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'lastSyncTimestamp');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct>
+      distinctByNotificationsEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'notificationsEnabled');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct>
+      distinctByThemeMode({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'themeMode', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct>
+      distinctByUserName({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'userName', caseSensitive: caseSensitive);
+    });
+  }
+}
+
+extension UserPreferencesModelQueryProperty on QueryBuilder<
+    UserPreferencesModel, UserPreferencesModel, QQueryProperty> {
+  QueryBuilder<UserPreferencesModel, int, QQueryOperations> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, bool, QQueryOperations>
+      hasCompletedOnboardingProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'hasCompletedOnboarding');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, DateTime?, QQueryOperations>
+      lastSyncTimestampProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'lastSyncTimestamp');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, bool, QQueryOperations>
+      notificationsEnabledProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'notificationsEnabled');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, String?, QQueryOperations>
+      themeModeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'themeMode');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, String?, QQueryOperations>
+      userNameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'userName');
+    });
+  }
+}
