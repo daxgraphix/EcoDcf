@@ -76,6 +76,7 @@ enum ChallengeType {
   social,
   carbon,
   education,
+  gaming,
 }
 
 class GamificationBadge extends Equatable {

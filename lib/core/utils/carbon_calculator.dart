@@ -8,7 +8,6 @@ class CarbonCalculator {
     required double hours,
     String? deviceName,
   }) {
-    // kWh = (Watts * Hours) / 1000
     final kwh = (watts * hours) / 1000;
     final kgCO2 = kwh * EmissionFactors.electricityGlobalAverage;
 
@@ -49,20 +48,18 @@ class CarbonCalculator {
 
   static CarbonRecord calculateStreaming({
     required double hours,
-    required String quality, // 'SD', 'HD', 'FullHD'
+    required String quality,
   }) {
     double factor;
     switch (quality.toUpperCase()) {
       case 'FULLHD':
         factor = EmissionFactors.streamingFullHD;
-        break;
       case 'HD':
         factor = EmissionFactors.streamingHD;
-        break;
       case 'SD':
+        factor = EmissionFactors.streamingSD;
       default:
         factor = EmissionFactors.streamingSD;
-        break;
     }
 
     final kgCO2 = hours * factor;
@@ -93,6 +90,129 @@ class CarbonCalculator {
       createdAt: DateTime.now(),
       metadata: {
         'prompts': promptCount,
+      },
+    );
+  }
+
+  static CarbonRecord calculateEmail({
+    required int count,
+    required bool hasAttachment,
+  }) {
+    final factor = hasAttachment ? EmissionFactors.emailWithAttachment : EmissionFactors.emailStandard;
+    final kgCO2 = count * factor;
+
+    return CarbonRecord(
+      id: const Uuid().v4(),
+      type: 'email',
+      carbonValue: kgCO2,
+      unit: 'kg CO2e',
+      createdAt: DateTime.now(),
+      metadata: {
+        'count': count,
+        'hasAttachment': hasAttachment,
+      },
+    );
+  }
+
+  static CarbonRecord calculateSearch({
+    required int searchCount,
+  }) {
+    final kgCO2 = searchCount * EmissionFactors.searchGoogle;
+
+    return CarbonRecord(
+      id: const Uuid().v4(),
+      type: 'search',
+      carbonValue: kgCO2,
+      unit: 'kg CO2e',
+      createdAt: DateTime.now(),
+      metadata: {
+        'searchCount': searchCount,
+      },
+    );
+  }
+
+  static CarbonRecord calculateCloudStorage({
+    required double gbStored,
+    required double gbTransferred,
+  }) {
+    final kgCO2 = (gbStored * EmissionFactors.dataTransferWifi * 0.05) + 
+                  (gbTransferred * EmissionFactors.dataTransferWifi);
+
+    return CarbonRecord(
+      id: const Uuid().v4(),
+      type: 'cloud_storage',
+      carbonValue: kgCO2,
+      unit: 'kg CO2e',
+      createdAt: DateTime.now(),
+      metadata: {
+        'gbStored': gbStored,
+        'gbTransferred': gbTransferred,
+      },
+    );
+  }
+
+  static CarbonRecord calculateSocialMedia({
+    required double hours,
+    required int posts,
+  }) {
+    final kgCO2 = (hours * EmissionFactors.streamingSD * 0.5) + (posts * EmissionFactors.emailStandard * 0.1);
+
+    return CarbonRecord(
+      id: const Uuid().v4(),
+      type: 'social_media',
+      carbonValue: kgCO2,
+      unit: 'kg CO2e',
+      createdAt: DateTime.now(),
+      metadata: {
+        'hours': hours,
+        'posts': posts,
+      },
+    );
+  }
+
+  static CarbonRecord calculateGaming({
+    required double hours,
+    required String platform,
+  }) {
+    double factor;
+    switch (platform.toLowerCase()) {
+      case 'console':
+        factor = 0.2;
+      case 'pc':
+        factor = 0.15;
+      case 'mobile':
+        factor = 0.05;
+      default:
+        factor = 0.1;
+    }
+    final kgCO2 = hours * factor;
+
+    return CarbonRecord(
+      id: const Uuid().v4(),
+      type: 'gaming',
+      carbonValue: kgCO2,
+      unit: 'kg CO2e',
+      createdAt: DateTime.now(),
+      metadata: {
+        'hours': hours,
+        'platform': platform,
+      },
+    );
+  }
+
+  static CarbonRecord calculateMusicStreaming({
+    required double hours,
+  }) {
+    final kgCO2 = hours * EmissionFactors.streamingSD * 0.2;
+
+    return CarbonRecord(
+      id: const Uuid().v4(),
+      type: 'music_streaming',
+      carbonValue: kgCO2,
+      unit: 'kg CO2e',
+      createdAt: DateTime.now(),
+      metadata: {
+        'hours': hours,
       },
     );
   }

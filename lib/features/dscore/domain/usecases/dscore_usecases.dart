@@ -13,11 +13,16 @@ class CalculateDScoreUseCaseImpl implements CalculateDScoreUseCase {
   @override
   Future<DScore> call(DScoreInput input) {
     final score = _calculateScore(input);
+    final recommendations = _generateRecommendations(input);
     final dscore = DScore(
       score: score,
       level: _getLevelName(score),
       date: DateTime.now(),
       breakdown: input.toMap(),
+      todayCarbon: input.todayCarbon,
+      weeklyCarbon: input.weeklyCarbon,
+      monthlyCarbon: input.monthlyCarbon,
+      recommendations: recommendations,
     );
     _repository.saveScore(dscore);
     return Future.value(dscore);
@@ -26,13 +31,13 @@ class CalculateDScoreUseCaseImpl implements CalculateDScoreUseCase {
   double _calculateScore(DScoreInput input) {
     double total = 100.0;
 
-    total -= input.deviceCarbon * 2;
-    total -= input.internetCarbon * 1.5;
-    total -= input.streamingCarbon * 3;
-    total -= input.emailCarbon * 0.5;
-    total -= input.cloudCarbon * 2;
-    total -= input.aiCarbon * 4;
-    total -= input.socialCarbon * 1;
+    total -= (input.deviceCarbon / 10.0).clamp(0.0, 30.0);
+    total -= (input.internetCarbon / 0.5).clamp(0.0, 20.0);
+    total -= (input.streamingCarbon * 2).clamp(0.0, 25.0);
+    total -= (input.emailCarbon * 10).clamp(0.0, 10.0);
+    total -= (input.cloudCarbon / 10.0).clamp(0.0, 15.0);
+    total -= (input.aiCarbon * 5).clamp(0.0, 20.0);
+    total -= (input.socialCarbon * 2).clamp(0.0, 15.0);
 
     return total.clamp(0.0, 100.0);
   }
@@ -44,6 +49,28 @@ class CalculateDScoreUseCaseImpl implements CalculateDScoreUseCase {
     if (score < 90) return 'Champion';
     return 'Digital Guardian';
   }
+
+  Map<String, dynamic> _generateRecommendations(DScoreInput input) {
+    final recommendations = <String, dynamic>{
+      'quickWins': <String>[],
+      'focusAreas': <String>[],
+    };
+
+    if (input.streamingCarbon > 2.0) {
+      recommendations['quickWins'].add('Reduce streaming quality to SD for large screens');
+    }
+    if (input.deviceCarbon > 5.0) {
+      recommendations['quickWins'].add('Enable dark mode to reduce OLED screen energy');
+    }
+    if (input.cloudCarbon > 10.0) {
+      recommendations['focusAreas'].add('Cloud Storage Optimization');
+    }
+    if (input.aiCarbon > 1.0) {
+      recommendations['focusAreas'].add('AI Usage Awareness');
+    }
+
+    return recommendations;
+  }
 }
 
 class DScoreInput {
@@ -54,6 +81,9 @@ class DScoreInput {
   final double cloudCarbon;
   final double aiCarbon;
   final double socialCarbon;
+  final double todayCarbon;
+  final double weeklyCarbon;
+  final double monthlyCarbon;
 
   DScoreInput({
     this.deviceCarbon = 0.0,
@@ -63,6 +93,9 @@ class DScoreInput {
     this.cloudCarbon = 0.0,
     this.aiCarbon = 0.0,
     this.socialCarbon = 0.0,
+    this.todayCarbon = 0.0,
+    this.weeklyCarbon = 0.0,
+    this.monthlyCarbon = 0.0,
   });
 
   Map<String, dynamic> toMap() {
