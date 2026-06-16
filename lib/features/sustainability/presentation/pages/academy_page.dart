@@ -44,9 +44,12 @@ class AcademyPage extends ConsumerWidget {
           body: ValueListenableBuilder<String?>(
             valueListenable: selectedCategory,
             builder: (context, selectedCategoryId, child) {
-              final filteredLessons = selectedCategoryId == null
+              final selectedCategoryTitle = selectedCategoryId == null
+                  ? null
+                  : academyData.categories.firstWhere((c) => c.id == selectedCategoryId,orElse: () => categories.first).title;
+              final filteredLessons = selectedCategoryTitle == null
                   ? academyData.lessons
-                  : academyData.lessons.where((l) => l.category == selectedCategoryId).toList();
+                  : academyData.lessons.where((l) => l.category == selectedCategoryTitle).toList();
 
               return CustomScrollView(
                 slivers: [
@@ -334,6 +337,8 @@ class _LessonCard extends StatelessWidget {
 
   IconData _getCategoryIcon(String category) {
     switch (category) {
+      case 'Training Ground':
+        return Icons.military_tech;
       case 'Foundations':
         return Icons.lightbulb;
       case 'Device Care':
