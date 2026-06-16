@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:ecodcf/core/design_system/app_design_system.dart';
 import 'package:ecodcf/core/routes/app_routes.dart';
+import 'package:ecodcf/core/providers/preferences_provider.dart';
 import 'package:ecodcf/features/dashboard/presentation/bloc/dashboard_notifier.dart';
 import 'package:ecodcf/features/dashboard/domain/entities/dashboard_stats.dart';
 
@@ -12,9 +13,15 @@ class ProfilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboardAsync = ref.watch(dashboardProvider);
+    final prefsAsync = ref.watch(userPreferencesProvider);
     final stats = dashboardAsync.maybeWhen(
       data: (data) => data,
       orElse: () => const DashboardStats(),
+    );
+
+    final userName = prefsAsync.maybeWhen(
+      data: (prefs) => prefs.userName ?? 'Eco Guardian',
+      orElse: () => 'Eco Guardian',
     );
 
     return Scaffold(
@@ -37,9 +44,19 @@ class ProfilePage extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text(
-                'Eco Guardian',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    userName,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  GestureDetector(
+                    onTap: () => _showEditNameDialog(context, ref, userName),
+                    child: const Icon(Icons.edit, size: 20, color: AppColors.forestGreen),
+                  ),
+                ],
               ),
               Text(
                 'Digital Sustainability Expert',
@@ -61,6 +78,32 @@ class ProfilePage extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showEditNameDialog(BuildContext context, WidgetRef ref, String currentName) {
+    final controller = TextEditingController(text: currentName);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Name'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Enter your name'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              if (controller.text.isNotEmpty) {
+                ref.read(userPreferencesProvider.notifier).updateName(controller.text);
+              }
+              Navigator.pop(context);
+            },
+            child: const Text('Save'),
+          ),
+        ],
       ),
     );
   }

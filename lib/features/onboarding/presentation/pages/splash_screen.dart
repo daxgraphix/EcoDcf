@@ -13,13 +13,11 @@ class SplashScreen extends ConsumerWidget {
 
     prefsAsync.when(
       data: (prefs) {
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (context.mounted) {
-            if (prefs.hasCompletedOnboarding) {
-              context.go('/main');
-            } else {
-              context.go('/onboarding');
-            }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (prefs.hasCompletedOnboarding) {
+            context.go('/main');
+          } else {
+            context.go('/onboarding');
           }
         });
       },

@@ -26,4 +26,7 @@ class AppColors {
   static const gold = Color(0xFFFFD700);
   static const lightGray = Color(0xFFE0E0E0);
   static const darkGray = Color(0xFF616161);
+  
+  static const shimmerBase = Color(0xFFE0E0E0);
+  static const shimmerHighlight = Color(0xFFBDBDBD);
 }

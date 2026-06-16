@@ -57,6 +57,11 @@ class UserPreferences extends _$UserPreferences {
     ref.invalidateSelf();
   }
 
+  Future<void> updateNotifications(bool enabled) async {
+    await _repository.updateNotifications(enabled);
+    ref.invalidateSelf();
+  }
+
   Future<void> updateName(String name) async {
     await _repository.updateUserName(name);
     ref.invalidateSelf();

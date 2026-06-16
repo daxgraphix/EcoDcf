@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ecodcf/features/sustainability/domain/entities/lesson.dart';
 import 'package:ecodcf/core/design_system/colors/app_colors.dart';
 import 'package:ecodcf/features/sustainability/presentation/notifiers/academy_notifier.dart';
+import 'package:flutter/services.dart';
 
 class LessonDetailPage extends ConsumerWidget {
   final Lesson? lesson;
@@ -64,7 +65,6 @@ class _LessonViewState extends State<_LessonView> {
         curve: Curves.easeInOut,
       );
     } else {
-      // Completed all steps
       widget.onMarkComplete();
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -267,6 +267,7 @@ class _LessonViewState extends State<_LessonView> {
                 onTap: _quizSubmitted
                     ? null
                     : () {
+                        HapticFeedback.lightImpact();
                         setState(() {
                           _selectedQuizAnswer = index;
                         });

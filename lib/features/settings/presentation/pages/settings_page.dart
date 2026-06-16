@@ -39,11 +39,9 @@ class SettingsPage extends ConsumerWidget {
                   title: 'Notifications',
                   trailing: Switch(
                     value: prefs.notificationsEnabled,
-                    onChanged: (val) {
-                      // Logic for notification toggle
-                    },
+                    onChanged: (val) => ref.read(userPreferencesProvider.notifier).updateNotifications(val),
                   ),
-                  onTap: () {},
+                  onTap: () => ref.read(userPreferencesProvider.notifier).updateNotifications(prefs.notificationsEnabled),
                 ),
                 _SettingsItem(
                   icon: Icons.security,
@@ -120,8 +118,8 @@ class SettingsPage extends ConsumerWidget {
             _SettingsSection(
               title: 'App',
               items: [
-                _SettingsItem(icon: Icons.notifications_active, title: 'Reminders', onTap: () {}),
-                _SettingsItem(icon: Icons.info, title: 'About', onTap: () {}),
+                _SettingsItem(icon: Icons.notifications_active, title: 'Reminders', subtitle: 'Daily tips & challenges', onTap: () => _showRemindersDialog(context, ref)),
+                _SettingsItem(icon: Icons.info, title: 'About', subtitle: 'Version 1.0.0', onTap: () => _showAboutDialog(context)),
               ],
             ),
           ],
@@ -185,6 +183,56 @@ class SettingsPage extends ConsumerWidget {
             },
             child: const Text('Save'),
           ),
+        ],
+      ),
+    );
+  }
+
+  void _showRemindersDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Daily Reminders'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text('Morning Tip'),
+              subtitle: Text('Daily sustainability tip at 9 AM'),
+              trailing: Switch(value: true, onChanged: null),
+            ),
+            ListTile(
+              title: Text('Weekly Report'),
+              subtitle: Text('Your carbon footprint summary'),
+              trailing: Switch(value: false, onChanged: null),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Done')),
+        ],
+      ),
+    );
+  }
+
+  void _showAboutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('EcoDcf'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Version: 1.0.0'),
+            SizedBox(height: 8),
+            Text('Digital Carbon Intelligence'),
+            SizedBox(height: 8),
+            Text('© 2026 EcoDcf Team'),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK')),
         ],
       ),
     );

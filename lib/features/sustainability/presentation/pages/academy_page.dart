@@ -14,6 +14,13 @@ class AcademyPage extends ConsumerStatefulWidget {
 
 class _AcademyPageState extends ConsumerState<AcademyPage> {
   String selectedCategoryId = 'training';
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,126 +35,185 @@ class _AcademyPageState extends ConsumerState<AcademyPage> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.search),
-                onPressed: () {},
+                onPressed: () => _showSearchDialog(context),
               ),
             ],
           ),
           SliverToBoxAdapter(
-            child: SizedBox(
-              height: 135,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                itemCount: academyState.categories.length,
-                itemBuilder: (context, index) {
-                  final cat = academyState.categories[index];
-                  final isSelected = selectedCategoryId == cat.id;
-                  return GestureDetector(
-                    onTap: () => setState(() => selectedCategoryId = cat.id),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      width: 110,
-                      margin: const EdgeInsets.only(
-                          right: AppSpacing.md,
-                          top: AppSpacing.md,
-                          bottom: AppSpacing.sm),
-                      padding: const EdgeInsets.all(AppSpacing.sm),
-                      decoration: BoxDecoration(
-                        color:
-                            isSelected ? AppColors.forestGreen : Colors.white,
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                    color: AppColors.forestGreen
-                                        .withValues(alpha: 0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4))
-                              ]
-                            : [
-                                BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2))
-                              ],
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _getIconData(cat.icon),
-                            color: isSelected
-                                ? Colors.white
-                                : AppColors.forestGreen,
-                            size: 28,
-                          ),
-                          const SizedBox(height: AppSpacing.xs),
-                          Text(
-                            cat.title,
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: isSelected ? Colors.white : AppColors.dark,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+            child: _buildCategorySelector(academyState),
           ),
           SliverPadding(
             padding: const EdgeInsets.all(AppSpacing.md),
             sliver: SliverToBoxAdapter(
-              child: Text(
-                selectedCategoryId == 'training'
-                    ? 'Training Ground Missions'
-                    : 'Recommended for You',
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    selectedCategoryId == 'training'
+                        ? 'Training Ground Missions'
+                        : 'Recommended for You',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.forestGreen.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppSpacing.xs),
+                    ),
+                    child: Text(
+                      '${_getFilteredLessons(academyState).length} Lessons',
+                      style: const TextStyle(
+                        color: AppColors.forestGreen,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
           academyState.isLoading
               ? const SliverToBoxAdapter(
-                  child: Center(
-                      child: Padding(
-                  padding: EdgeInsets.all(AppSpacing.xl),
-                  child: CircularProgressIndicator(),
-                )))
+                  child: Padding(
+                    padding: EdgeInsets.all(AppSpacing.xl),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                )
               : SliverPadding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        final filteredLessons = academyState.lessons.where((l) {
-                          final category = academyState.categories.firstWhere(
-                              (c) => c.id == selectedCategoryId,
-                              orElse: () => academyState.categories.first);
-                          return l.category.toLowerCase() ==
-                              category.title.toLowerCase();
-                        }).toList();
-
+                        final filteredLessons = _getFilteredLessons(academyState);
                         if (index >= filteredLessons.length) return null;
                         final lesson = filteredLessons[index];
-                        return _LessonCard(lesson: lesson);
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                          child: _LessonCard(lesson: lesson),
+                        );
                       },
-                      childCount: academyState.lessons.where((l) {
-                        final category = academyState.categories.firstWhere(
-                            (c) => c.id == selectedCategoryId,
-                            orElse: () => academyState.categories.first);
-                        return l.category.toLowerCase() ==
-                            category.title.toLowerCase();
-                      }).length,
+                      childCount: _getFilteredLessons(academyState).length,
                     ),
                   ),
                 ),
+        ],
+      ),
+    );
+  }
+
+  List<Lesson> _getFilteredLessons(academyState) {
+    return academyState.lessons.where((l) {
+      final category = academyState.categories.firstWhere(
+        (c) => c.id == selectedCategoryId,
+        orElse: () => academyState.categories.first,
+      );
+      return l.category.toLowerCase() == category.title.toLowerCase();
+    }).toList();
+  }
+
+  Widget _buildCategorySelector(academyState) {
+    return SizedBox(
+      height: 120,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        itemCount: academyState.categories.length,
+        itemBuilder: (context, index) {
+          final cat = academyState.categories[index];
+          final isSelected = selectedCategoryId == cat.id;
+          return GestureDetector(
+            onTap: () => setState(() => selectedCategoryId = cat.id),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: 100,
+              margin: const EdgeInsets.only(right: AppSpacing.md),
+              decoration: BoxDecoration(
+                gradient: isSelected
+                    ? const LinearGradient(
+                        colors: [AppColors.forestGreen, AppColors.leafGreen],
+                      )
+                    : null,
+                color: isSelected ? null : Colors.white,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                boxShadow: [
+                  BoxShadow(
+                    color: (isSelected
+                            ? AppColors.forestGreen
+                            : Colors.black)
+                        .withValues(alpha: isSelected ? 0.3 : 0.05),
+                    blurRadius: isSelected ? 12 : 4,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: (isSelected
+                              ? Colors.white
+                              : AppColors.forestGreen)
+                          .withValues(alpha: isSelected ? 0.2 : 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _getIconData(cat.icon),
+                      color: isSelected ? Colors.white : AppColors.forestGreen,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    cat.title,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.white : AppColors.dark,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showSearchDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Search Lessons'),
+        content: TextField(
+          controller: _searchController,
+          decoration: const InputDecoration(hintText: 'Enter lesson title...'),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              // Implement search logic
+              Navigator.pop(context);
+            },
+            child: const Text('Search'),
+          ),
         ],
       ),
     );
@@ -181,7 +247,7 @@ class _LessonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),
         side: const BorderSide(color: AppColors.grey200),
@@ -195,15 +261,17 @@ class _LessonCard extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 60,
-                height: 60,
+                width: 56,
+                height: 56,
                 decoration: BoxDecoration(
-                  color: AppColors.leafGreen.withValues(alpha: 0.1),
+                  gradient: const LinearGradient(
+                    colors: [AppColors.forestGreen, AppColors.leafGreen],
+                  ),
                   borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Icon(
                   _getCategoryIcon(lesson.category),
-                  color: AppColors.leafGreen,
+                  color: Colors.white,
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -214,7 +282,9 @@ class _LessonCard extends StatelessWidget {
                     Text(
                       lesson.title,
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
@@ -222,24 +292,18 @@ class _LessonCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          color: AppColors.grey600, fontSize: 13),
+                        color: AppColors.grey600,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Row(
                       children: [
-                        const Icon(Icons.timer_outlined,
-                            size: 14, color: AppColors.grey500),
-                        const SizedBox(width: 4),
-                        Text('${lesson.durationMinutes} min',
-                            style: const TextStyle(
-                                color: AppColors.grey500, fontSize: 12)),
+                        _buildChip(const Icon(Icons.timer_outlined, size: 14),
+                            '${lesson.durationMinutes} min'),
                         const SizedBox(width: AppSpacing.md),
-                        const Icon(Icons.quiz_outlined,
-                            size: 14, color: AppColors.grey500),
-                        const SizedBox(width: 4),
-                        Text('${lesson.quizzes.length} Quiz',
-                            style: const TextStyle(
-                                color: AppColors.grey500, fontSize: 12)),
+                        _buildChip(const Icon(Icons.quiz_outlined, size: 14),
+                            '${lesson.quizzes.length} Quiz'),
                       ],
                     ),
                   ],
@@ -250,6 +314,19 @@ class _LessonCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildChip(Icon icon, String text) {
+    return Row(
+      children: [
+        icon,
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: const TextStyle(color: AppColors.grey500, fontSize: 12),
+        ),
+      ],
     );
   }
 

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:ecodcf/core/design_system/app_design_system.dart';
 import 'package:ecodcf/core/presentation/widgets/error_view.dart';
+import 'package:ecodcf/core/presentation/widgets/shimmer_loading.dart';
 import 'package:ecodcf/features/dashboard/presentation/bloc/dashboard_notifier.dart';
+import 'package:ecodcf/core/utils/carbon_calculator.dart';
 import 'package:ecodcf/core/utils/impact_equivalency_converter.dart';
-import 'package:ecodcf/features/challenges/providers/challenges_providers.dart';
+import 'package:ecodcf/features/carbon/providers/carbon_providers.dart';
+import 'package:ecodcf/features/carbon/domain/entities/carbon_record.dart';
 import 'package:ecodcf/features/dashboard/domain/entities/dashboard_stats.dart';
+import 'package:flutter/services.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -16,51 +19,77 @@ class DashboardPage extends ConsumerWidget {
     final dashboardAsync = ref.watch(dashboardProvider);
 
     return dashboardAsync.when(
-      data: (stats) => Scaffold(
-        backgroundColor: AppColors.offWhite,
-        body: SafeArea(
-          child: RefreshIndicator(
-            onRefresh: () => ref.read(dashboardProvider.notifier).refresh(),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-children: [
-                  const _HeaderWidget(),
-                  const SizedBox(height: AppSpacing.xl),
-                  _DScoreRingWidget(
-                    score: stats.dscore,
-                  ),
-const SizedBox(height: AppSpacing.xl),
-                  _ImpactEquivalencyList(
-                    carbon: stats.todayCarbon,
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  _AnalyticsSummaryWidget(
-                    stats: stats,
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  _DeviceUsageWidget(
-                    hours: stats.todayUsageHours,
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  const _ManualFootprintSection(),
-                  const SizedBox(height: AppSpacing.xl),
-                  const _PermissionsTrackerWidget(),
-                  const SizedBox(height: AppSpacing.xl),
-                  const _FixedChallengesWidget(),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      data: (stats) => _buildScaffold(context, ref, stats),
+      loading: () => const _LoadingScaffold(),
       error: (err, stack) => Scaffold(
         body: ErrorView(
           message: err.toString(),
           onRetry: () => ref.read(dashboardProvider.notifier).refresh(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context, WidgetRef ref, DashboardStats stats) {
+    return Scaffold(
+      backgroundColor: AppColors.offWhite,
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () => ref.read(dashboardProvider.notifier).refresh(),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _HeaderWidget(),
+                const SizedBox(height: AppSpacing.xl),
+                _DScoreRingWidget(score: stats.dscore),
+                const SizedBox(height: AppSpacing.xl),
+                _ImpactEquivalencyList(carbon: stats.todayCarbon),
+                const SizedBox(height: AppSpacing.xl),
+                _AnalyticsSummaryWidget(stats: stats),
+                const SizedBox(height: AppSpacing.xl),
+                _DeviceUsageWidget(hours: stats.todayUsageHours),
+                const SizedBox(height: AppSpacing.xl),
+                const _ManualFootprintSection(),
+                const SizedBox(height: AppSpacing.xl),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LoadingScaffold extends StatelessWidget {
+  const _LoadingScaffold();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.offWhite,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const ShimmerLoading(width: 200, height: 28),
+              const SizedBox(height: AppSpacing.sm),
+              const ShimmerLoading(width: 150, height: 16),
+              const SizedBox(height: AppSpacing.xl),
+              const ShimmerLoading(width: double.infinity, height: 200),
+              const SizedBox(height: AppSpacing.xl),
+              const ShimmerLoading(width: double.infinity, height: 120),
+              const SizedBox(height: AppSpacing.xl),
+              const ShimmerLoading(width: double.infinity, height: 160),
+              const SizedBox(height: AppSpacing.xl),
+              const ShimmerLoading(width: double.infinity, height: 200),
+            ],
+          ),
         ),
       ),
     );
@@ -85,7 +114,7 @@ class _HeaderWidget extends StatelessWidget {
                   ),
             ),
             GestureDetector(
-              onTap: () => context.push('/profile'),
+              onTap: () {},
               child: Hero(
                 tag: 'profile-pic',
                 child: Container(
@@ -205,77 +234,6 @@ class _DScoreRingWidget extends StatelessWidget {
   }
 }
 
-class _CarbonImpactWidget extends StatelessWidget {
-  final double carbon;
-  const _CarbonImpactWidget({required this.carbon});
-
-  @override
-  Widget build(BuildContext context) {
-    return EcoCard(
-      onTap: () => context.push('/analytics'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: AppColors.ecoBlue.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.co2, color: AppColors.ecoBlue, size: 32),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Today\'s Carbon', style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text('kg CO₂e', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.grey600)),
-                  ],
-                ),
-              ),
-              Text(
-                carbon.toStringAsFixed(2),
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.ecoBlue,
-                    ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Stack(
-            children: [
-              Container(
-                height: 8,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: AppColors.grey200,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-              ),
-              Container(
-                height: 8,
-                width: (carbon / 50).clamp(0.0, 1.0) * MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  color: AppColors.ecoBlue,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text('Goal: 50kg CO₂e', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.grey600)),
-        ],
-      ),
-    );
-  }
-}
-
 class _DeviceUsageWidget extends StatelessWidget {
   final double hours;
   const _DeviceUsageWidget({required this.hours});
@@ -283,7 +241,7 @@ class _DeviceUsageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return EcoCard(
-      onTap: () => context.push('/analytics'),
+      onTap: null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -350,81 +308,64 @@ class _DeviceUsageWidget extends StatelessWidget {
   }
 }
 
-class _FixedChallengesWidget extends ConsumerWidget {
-  const _FixedChallengesWidget();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final challengesAsync = ref.watch(challengesProvider);
-    return challengesAsync.when(
-      data: (challenges) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Active Challenges', style: Theme.of(context).textTheme.titleMedium),
-              TextButton(onPressed: () {}, child: const Text('See All')),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          if (challenges.isEmpty)
-            const EmptyState(
-              title: 'No challenges yet',
-              subtitle: 'Join a challenge to start earning badges!',
-              icon: Icons.star_border,
-            )
-          else
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: challenges.length,
-              itemBuilder: (context, index) => ListTile(
-                title: Text(challenges[index].title),
-                subtitle: Text(challenges[index].description),
-              ),
-            ),
-        ],
-      ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => const EmptyState(
-          icon: Icons.star_border,
-          title: 'Error Loading',
-          subtitle: 'Could not load challenges',
-        ),
-    );
-  }
-}
-
 // Interactive Manual Footprint Calculation
 class _ManualFootprintSection extends ConsumerStatefulWidget {
   const _ManualFootprintSection();
 
   @override
-  ConsumerState<_ManualFootprintSection> createState() =>
-      _ManualFootprintState();
+  ConsumerState<_ManualFootprintSection> createState() => _ManualFootprintState();
 }
 
 class _ManualFootprintState extends ConsumerState<_ManualFootprintSection> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _valueController = TextEditingController();
   String _selectedActivity = '';
-  final List<String> _activityOptions = const [
-    'Social Media Usage',
-    'Commuting',
-    'Energy Consumption',
-    'Dietary Choices'
-  ];
-  List<String> _calculationResults = [];
+  List<CarbonRecord> _recentRecords = [];
 
-  void _handleCalculate() {
-    if (_formKey.currentState!.validate() && _selectedActivity.isNotEmpty) {
-      setState(() {
-        _calculationResults = [
-          'Activity: $_selectedActivity',
-          'Impact calculated and added to your footprint',
-        ];
-      });
-    }
+  static const List<String> _activityOptions = [
+    'Email',
+    'Search',
+    'Cloud Storage',
+    'Social Media',
+    'Gaming',
+    'Music Streaming',
+    'Video Streaming',
+    'Video Call',
+    'File Download',
+    'Website Browsing',
+  ];
+
+  static const Map<String, String> _unitOptions = {
+    'Email': 'emails',
+    'Search': 'searches',
+    'Cloud Storage': 'GB',
+    'Social Media': 'hours',
+    'Gaming': 'hours',
+    'Music Streaming': 'hours',
+    'Video Streaming': 'hours',
+    'Video Call': 'hours',
+    'File Download': 'GB',
+    'Website Browsing': 'minutes',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecentRecords();
+  }
+
+  Future<void> _loadRecentRecords() async {
+    final repo = await ref.watch(carbonRepositoryProvider.future);
+    final records = await repo.getAllRecords();
+    setState(() {
+      _recentRecords = records.take(5).toList();
+    });
+  }
+
+  @override
+  void dispose() {
+    _valueController.dispose();
+    super.dispose();
   }
 
   @override
@@ -437,18 +378,17 @@ class _ManualFootprintState extends ConsumerState<_ManualFootprintSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Manual Footprint Calculation', 
+              const Text('Manual Footprint Calculation',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String>(
-                initialValue: _selectedActivity.isNotEmpty ? _selectedActivity : null,
+                value: _selectedActivity.isNotEmpty ? _selectedActivity : null,
                 items: _activityOptions
-                    .map((option) => DropdownMenuItem(
-                         value: option, child: Text(option)))
+                    .map((option) => DropdownMenuItem(value: option, child: Text(option)))
                     .toList(),
                 onChanged: (value) => setState(() => _selectedActivity = value ?? ''),
                 decoration: const InputDecoration(
-                  labelText: 'Select Activity Type',
+                  labelText: 'Select Activity',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -457,79 +397,108 @@ class _ManualFootprintState extends ConsumerState<_ManualFootprintSection> {
                 children: [
                   Expanded(
                     child: TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: 'Hours/Units',
-                        border: OutlineInputBorder(),
+                      controller: _valueController,
+                      decoration: InputDecoration(
+                        labelText: 'Value (${_unitOptions[_selectedActivity] ?? ''})',
+                        border: const OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
                   ElevatedButton(
-                    onPressed: _handleCalculate,
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate() && _selectedActivity.isNotEmpty) {
+                        HapticFeedback.lightImpact();
+                        final value = double.tryParse(_valueController.text) ?? 0;
+                        final record = _calculateRecord(_selectedActivity, value);
+
+                        final repo = await ref.watch(carbonRepositoryProvider.future);
+                        await repo.saveRecord(record);
+
+                        setState(() {
+                          _recentRecords.insert(0, record);
+                          if (_recentRecords.length > 5) _recentRecords.removeLast();
+                          _valueController.clear();
+                        });
+                      }
+                    },
                     child: const Text('Calculate'),
                   ),
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
-              if (_calculationResults.isNotEmpty)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Recent Calculations:', 
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    for (final result in _calculationResults) ...[
-                      Text(result, style: const TextStyle(color: Colors.green)),
-                      const SizedBox(height: 4),
-                    ],
-                  ],
-                ),
+              if (_recentRecords.isNotEmpty) ...[
+                const Text('Recent Calculations:',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: AppSpacing.sm),
+                ..._recentRecords.map((r) => _CarbonRecordTile(record: r)).toList(),
+              ],
             ],
           ),
         ),
       ),
     );
   }
+
+  CarbonRecord _calculateRecord(String activity, double value) {
+    switch (activity) {
+      case 'Email':
+        return CarbonCalculator.calculateEmail(count: value.toInt(), hasAttachment: false);
+      case 'Search':
+        return CarbonCalculator.calculateSearch(searchCount: value.toInt());
+      case 'Cloud Storage':
+        return CarbonCalculator.calculateCloudStorage(gbStored: value, gbTransferred: value * 2);
+      case 'Social Media':
+        return CarbonCalculator.calculateSocialMedia(hours: value, posts: 0);
+      case 'Gaming':
+        return CarbonCalculator.calculateGaming(hours: value, platform: 'console');
+      case 'Music Streaming':
+        return CarbonCalculator.calculateMusicStreaming(hours: value);
+      case 'Video Streaming':
+        return CarbonCalculator.calculateStreaming(hours: value, quality: 'HD');
+      case 'Video Call':
+        return CarbonCalculator.calculateVideoCall(hours: value, quality: 'HD');
+      case 'File Download':
+        return CarbonCalculator.calculateFileDownload(gb: value);
+      case 'Website Browsing':
+        return CarbonCalculator.calculateWebBrowsing(minutes: value);
+      default:
+        return CarbonCalculator.calculateDeviceEnergy(watts: value, hours: 1);
+    }
+  }
 }
 
-// Permissions Tracking Widget
-class _PermissionsTrackerWidget extends ConsumerWidget {
-  const _PermissionsTrackerWidget();
+class _CarbonRecordTile extends StatelessWidget {
+  final CarbonRecord record;
+  const _CarbonRecordTile({required this.record});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return EcoCard(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: ListTile(
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppColors.forestGreen.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.co2, color: AppColors.forestGreen, size: 20),
+        ),
+        title: Text(record.type.replaceAll('_', ' ').toUpperCase(),
+            style: const TextStyle(fontWeight: FontWeight.w500)),
+        subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Permissions Tracking', 
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: AppSpacing.sm),
-            const Text('Manage app permissions for better tracking',
-                style: TextStyle(color: AppColors.grey600)),
-            const SizedBox(height: AppSpacing.md),
-            const ListTile(
-              leading: Icon(Icons.camera),
-              title: Text('Camera Access'),
-              subtitle: Text('For QR code scanning'),
-              trailing: Icon(Icons.check_circle, color: Colors.green),
-            ),
-            const ListTile(
-              leading: Icon(Icons.location_on),
-              title: Text('Location'),
-              subtitle: Text('For local impact tracking'),
-              trailing: Icon(Icons.check_circle, color: Colors.green),
-            ),
-            const ListTile(
-              leading: Icon(Icons.analytics),
-              title: Text('Usage Analytics'),
-              subtitle: Text('For footprint calculation'),
-              trailing: Icon(Icons.check_circle, color: Colors.green),
-            ),
+            Text('${record.carbonValue.toStringAsFixed(3)} kg CO₂e',
+                style: const TextStyle(color: AppColors.forestGreen)),
+            Text(record.createdAt.toString().split('.')[0],
+                style: const TextStyle(fontSize: 10, color: AppColors.grey600)),
           ],
         ),
+        trailing: const Icon(Icons.chevron_right, size: 20),
       ),
     );
   }
@@ -542,30 +511,19 @@ class _AnalyticsSummaryWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return EcoCard(
-      onTap: () => context.push('/analytics'),
+      onTap: null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Analytics Summary', style: Theme.of(context).textTheme.titleMedium),
+          Text('Weekly Summary', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
               _SummaryItem(label: 'Weekly Change', value: '${stats.weeklyChange.toStringAsFixed(1)}kg'),
               const SizedBox(width: AppSpacing.md),
               _SummaryItem(label: 'Streak', value: '${stats.streakDays} days'),
-              const SizedBox(width: AppSpacing.md),
-              _SummaryItem(label: 'Completed', value: '${stats.challengesCompleted}'),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          LinearProgressIndicator(
-            value: (stats.challengesCompleted / 10).clamp(0.0, 1.0),
-            minHeight: 8,
-            backgroundColor: AppColors.grey200,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text('Challenge Completion: ${stats.challengesCompleted}/10', 
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.grey600)),
         ],
       ),
     );

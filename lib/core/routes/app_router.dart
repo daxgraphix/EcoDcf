@@ -14,14 +14,13 @@ import 'package:ecodcf/features/sustainability/presentation/pages/academy_page.d
 import 'package:ecodcf/features/sustainability/presentation/pages/lesson_detail_page.dart';
 import 'package:ecodcf/features/onboarding/presentation/pages/permissions_onboarding_page.dart';
 import 'package:ecodcf/features/report/presentation/pages/report_page.dart';
-import 'package:ecodcf/features/gamification/presentation/pages/gamification_page.dart';
 import 'package:ecodcf/features/gamification/presentation/pages/badges_page.dart';
 import 'package:ecodcf/features/gamification/presentation/pages/activity_history_page.dart';
 import 'package:ecodcf/features/onboarding/presentation/pages/onboarding_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorDashboard = GlobalKey<NavigatorState>(debugLabel: 'dashboard');
-final GlobalKey<NavigatorState> _shellNavigatorChallenges = GlobalKey<NavigatorState>(debugLabel: 'challenges');
+final GlobalKey<NavigatorState> _shellNavigatorAnalytics = GlobalKey<NavigatorState>(debugLabel: 'analytics');
 final GlobalKey<NavigatorState> _shellNavigatorAcademy = GlobalKey<NavigatorState>(debugLabel: 'academy');
 final GlobalKey<NavigatorState> _shellNavigatorProfile = GlobalKey<NavigatorState>(debugLabel: 'profile');
 final GlobalKey<NavigatorState> _shellNavigatorSettings = GlobalKey<NavigatorState>(debugLabel: 'settings');
@@ -55,11 +54,11 @@ final GoRouter appRouter = GoRouter(
           ],
         ),
         StatefulShellBranch(
-          navigatorKey: _shellNavigatorChallenges,
+          navigatorKey: _shellNavigatorAnalytics,
           routes: [
             GoRoute(
-              path: AppRoutes.challenges,
-              builder: (context, state) => const GamificationPage(),
+              path: AppRoutes.analytics,
+              builder: (context, state) => const AnalyticsPage(),
             ),
           ],
         ),
@@ -108,11 +107,6 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.dscore,
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const DScorePage(),
-    ),
-    GoRoute(
-      path: AppRoutes.analytics,
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const AnalyticsPage(),
     ),
     GoRoute(
       path: AppRoutes.permissionsOnboarding,

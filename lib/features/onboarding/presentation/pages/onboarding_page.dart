@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ecodcf/features/onboarding/domain/entities/onboarding_step.dart';
 import 'package:ecodcf/features/onboarding/presentation/bloc/onboarding_notifier.dart';
 import 'package:ecodcf/core/design_system/colors/app_colors.dart';
+import 'package:ecodcf/core/providers/preferences_provider.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
   const OnboardingPage({super.key});
@@ -25,6 +27,19 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   Widget build(BuildContext context) {
     final state = ref.watch(onboardingProvider);
     final steps = state is OnboardingLoaded ? state.steps.cast<OnboardingStep>().toList() : <OnboardingStep>[];
+
+    final prefsAsync = ref.watch(userPreferencesProvider);
+    prefsAsync.when(
+      data: (prefs) {
+        if (prefs.hasCompletedOnboarding) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.go('/main');
+          });
+        }
+      },
+      loading: () {},
+      error: (err, _) {},
+    );
 
     return Scaffold(
       backgroundColor: AppColors.forestGreen,

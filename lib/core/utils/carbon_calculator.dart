@@ -216,5 +216,69 @@ class CarbonCalculator {
       },
     );
   }
+
+  static CarbonRecord calculateVideoCall({
+    required double hours,
+    required String quality,
+  }) {
+    double factor;
+    switch (quality.toUpperCase()) {
+      case '4K':
+        factor = EmissionFactors.streaming4K;
+      case 'FULLHD':
+        factor = EmissionFactors.streamingFullHD;
+      case 'HD':
+        factor = EmissionFactors.streamingHD;
+      default:
+        factor = EmissionFactors.streamingSD;
+    }
+    final kgCO2 = hours * factor * 1.5;
+
+    return CarbonRecord(
+      id: const Uuid().v4(),
+      type: 'video_call',
+      carbonValue: kgCO2,
+      unit: 'kg CO2e',
+      createdAt: DateTime.now(),
+      metadata: {
+        'hours': hours,
+        'quality': quality,
+      },
+    );
+  }
+
+  static CarbonRecord calculateFileDownload({
+    required double gb,
+  }) {
+    final kgCO2 = gb * EmissionFactors.dataTransferWifi * 0.1;
+
+    return CarbonRecord(
+      id: const Uuid().v4(),
+      type: 'file_download',
+      carbonValue: kgCO2,
+      unit: 'kg CO2e',
+      createdAt: DateTime.now(),
+      metadata: {
+        'gb': gb,
+      },
+    );
+  }
+
+  static CarbonRecord calculateWebBrowsing({
+    required double minutes,
+  }) {
+    final kgCO2 = (minutes / 60) * EmissionFactors.dataTransferWifi * 0.05;
+
+    return CarbonRecord(
+      id: const Uuid().v4(),
+      type: 'web_browsing',
+      carbonValue: kgCO2,
+      unit: 'kg CO2e',
+      createdAt: DateTime.now(),
+      metadata: {
+        'minutes': minutes,
+      },
+    );
+  }
 }
 

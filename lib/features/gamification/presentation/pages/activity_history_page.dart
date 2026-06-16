@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:ecodcf/core/design_system/app_design_system.dart';
-import 'package:ecodcf/features/gamification/domain/entities/challenge.dart';
 
 class ActivityHistoryPage extends StatelessWidget {
   const ActivityHistoryPage({super.key});

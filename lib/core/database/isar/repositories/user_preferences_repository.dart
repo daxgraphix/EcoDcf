@@ -62,6 +62,14 @@ class UserPreferencesRepository {
     });
   }
 
+  Future<void> updateNotifications(bool enabled) async {
+    final prefs = await getPreferences();
+    await _isar.writeTxn(() async {
+      prefs.notificationsEnabled = enabled;
+      await _isar.userPreferencesModels.put(prefs);
+    });
+  }
+
   Future<void> updateUserName(String name) async {
     final prefs = await getPreferences();
     await _isar.writeTxn(() async {
