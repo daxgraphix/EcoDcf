@@ -62,12 +62,12 @@ class PermissionsOnboardingPage extends ConsumerWidget {
     );
   }
 
-  void _requestUsageAccess(BuildContext context) {
+void _requestUsageAccess(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Usage Access'),
-        content: const Text('Please grant usage access in Settings to track your screen time.'),
+        content: const Text('Please grant usage access in Settings to track your screen time and calculate your digital carbon footprint.'),
         actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
       ),
     );
@@ -78,7 +78,7 @@ class PermissionsOnboardingPage extends ConsumerWidget {
     final granted = await service.requestNotificationPermission();
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(granted ? 'Granted' : 'Denied')),
+        SnackBar(content: Text(granted ? 'Notification permission granted' : 'Permission denied')),
       );
     }
   }
@@ -88,7 +88,7 @@ class PermissionsOnboardingPage extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Battery Optimization'),
-        content: const Text('Please disable battery optimization for this app to get accurate readings.'),
+        content: const Text('Please disable battery optimization for this app to get accurate readings and reliable tracking.'),
         actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
       ),
     );

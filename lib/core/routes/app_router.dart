@@ -9,11 +9,14 @@ import 'package:ecodcf/features/settings/presentation/pages/settings_page.dart';
 import 'package:ecodcf/features/settings/presentation/pages/privacy_center_page.dart';
 import 'package:ecodcf/features/dscore/presentation/pages/dscore_page.dart';
 import 'package:ecodcf/features/analytics/presentation/pages/analytics_page.dart';
+import 'package:ecodcf/features/sustainability/domain/entities/lesson.dart';
 import 'package:ecodcf/features/sustainability/presentation/pages/academy_page.dart';
 import 'package:ecodcf/features/sustainability/presentation/pages/lesson_detail_page.dart';
 import 'package:ecodcf/features/onboarding/presentation/pages/permissions_onboarding_page.dart';
 import 'package:ecodcf/features/report/presentation/pages/report_page.dart';
 import 'package:ecodcf/features/gamification/presentation/pages/gamification_page.dart';
+import 'package:ecodcf/features/gamification/presentation/pages/badges_page.dart';
+import 'package:ecodcf/features/gamification/presentation/pages/activity_history_page.dart';
 import 'package:ecodcf/features/onboarding/presentation/pages/onboarding_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -69,7 +72,7 @@ final GoRouter appRouter = GoRouter(
               routes: [
                 GoRoute(
                   path: 'lesson',
-                  builder: (context, state) => const LessonDetailPage(),
+                  builder: (context, state) => LessonDetailPage(lesson: state.extra as Lesson?),
                 ),
               ],
             ),
@@ -120,6 +123,16 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.reports,
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const ReportPage(),
+    ),
+    GoRoute(
+      path: AppRoutes.badges,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const BadgesPage(),
+    ),
+    GoRoute(
+      path: AppRoutes.activityHistory,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const ActivityHistoryPage(),
     ),
   ],
 );

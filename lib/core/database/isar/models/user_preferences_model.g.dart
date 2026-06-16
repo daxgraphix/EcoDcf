@@ -18,28 +18,58 @@ const UserPreferencesModelSchema = CollectionSchema(
   name: r'UserPreferencesModel',
   id: 3603656307210587948,
   properties: {
-    r'hasCompletedOnboarding': PropertySchema(
+    r'autoSyncEnabled': PropertySchema(
       id: 0,
+      name: r'autoSyncEnabled',
+      type: IsarType.bool,
+    ),
+    r'cloudSyncEnabled': PropertySchema(
+      id: 1,
+      name: r'cloudSyncEnabled',
+      type: IsarType.bool,
+    ),
+    r'deviceTrackingEnabled': PropertySchema(
+      id: 2,
+      name: r'deviceTrackingEnabled',
+      type: IsarType.bool,
+    ),
+    r'fontSizeScale': PropertySchema(
+      id: 3,
+      name: r'fontSizeScale',
+      type: IsarType.double,
+    ),
+    r'hasCompletedOnboarding': PropertySchema(
+      id: 4,
       name: r'hasCompletedOnboarding',
       type: IsarType.bool,
     ),
+    r'highContrastEnabled': PropertySchema(
+      id: 5,
+      name: r'highContrastEnabled',
+      type: IsarType.bool,
+    ),
     r'lastSyncTimestamp': PropertySchema(
-      id: 1,
+      id: 6,
       name: r'lastSyncTimestamp',
       type: IsarType.dateTime,
     ),
     r'notificationsEnabled': PropertySchema(
-      id: 2,
+      id: 7,
       name: r'notificationsEnabled',
       type: IsarType.bool,
     ),
+    r'reduceMotionEnabled': PropertySchema(
+      id: 8,
+      name: r'reduceMotionEnabled',
+      type: IsarType.bool,
+    ),
     r'themeMode': PropertySchema(
-      id: 3,
+      id: 9,
       name: r'themeMode',
       type: IsarType.string,
     ),
     r'userName': PropertySchema(
-      id: 4,
+      id: 10,
       name: r'userName',
       type: IsarType.string,
     )
@@ -85,11 +115,17 @@ void _userPreferencesModelSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeBool(offsets[0], object.hasCompletedOnboarding);
-  writer.writeDateTime(offsets[1], object.lastSyncTimestamp);
-  writer.writeBool(offsets[2], object.notificationsEnabled);
-  writer.writeString(offsets[3], object.themeMode);
-  writer.writeString(offsets[4], object.userName);
+  writer.writeBool(offsets[0], object.autoSyncEnabled);
+  writer.writeBool(offsets[1], object.cloudSyncEnabled);
+  writer.writeBool(offsets[2], object.deviceTrackingEnabled);
+  writer.writeDouble(offsets[3], object.fontSizeScale);
+  writer.writeBool(offsets[4], object.hasCompletedOnboarding);
+  writer.writeBool(offsets[5], object.highContrastEnabled);
+  writer.writeDateTime(offsets[6], object.lastSyncTimestamp);
+  writer.writeBool(offsets[7], object.notificationsEnabled);
+  writer.writeBool(offsets[8], object.reduceMotionEnabled);
+  writer.writeString(offsets[9], object.themeMode);
+  writer.writeString(offsets[10], object.userName);
 }
 
 UserPreferencesModel _userPreferencesModelDeserialize(
@@ -99,12 +135,18 @@ UserPreferencesModel _userPreferencesModelDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = UserPreferencesModel();
-  object.hasCompletedOnboarding = reader.readBool(offsets[0]);
+  object.autoSyncEnabled = reader.readBool(offsets[0]);
+  object.cloudSyncEnabled = reader.readBool(offsets[1]);
+  object.deviceTrackingEnabled = reader.readBool(offsets[2]);
+  object.fontSizeScale = reader.readDouble(offsets[3]);
+  object.hasCompletedOnboarding = reader.readBool(offsets[4]);
+  object.highContrastEnabled = reader.readBool(offsets[5]);
   object.id = id;
-  object.lastSyncTimestamp = reader.readDateTimeOrNull(offsets[1]);
-  object.notificationsEnabled = reader.readBool(offsets[2]);
-  object.themeMode = reader.readStringOrNull(offsets[3]);
-  object.userName = reader.readStringOrNull(offsets[4]);
+  object.lastSyncTimestamp = reader.readDateTimeOrNull(offsets[6]);
+  object.notificationsEnabled = reader.readBool(offsets[7]);
+  object.reduceMotionEnabled = reader.readBool(offsets[8]);
+  object.themeMode = reader.readStringOrNull(offsets[9]);
+  object.userName = reader.readStringOrNull(offsets[10]);
   return object;
 }
 
@@ -118,12 +160,24 @@ P _userPreferencesModelDeserializeProp<P>(
     case 0:
       return (reader.readBool(offset)) as P;
     case 1:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 2:
       return (reader.readBool(offset)) as P;
     case 3:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 4:
+      return (reader.readBool(offset)) as P;
+    case 5:
+      return (reader.readBool(offset)) as P;
+    case 6:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 7:
+      return (reader.readBool(offset)) as P;
+    case 8:
+      return (reader.readBool(offset)) as P;
+    case 9:
+      return (reader.readStringOrNull(offset)) as P;
+    case 10:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -228,10 +282,116 @@ extension UserPreferencesModelQueryWhere
 extension UserPreferencesModelQueryFilter on QueryBuilder<UserPreferencesModel,
     UserPreferencesModel, QFilterCondition> {
   QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> autoSyncEnabledEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'autoSyncEnabled',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> cloudSyncEnabledEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'cloudSyncEnabled',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> deviceTrackingEnabledEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'deviceTrackingEnabled',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> fontSizeScaleEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'fontSizeScale',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> fontSizeScaleGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'fontSizeScale',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> fontSizeScaleLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'fontSizeScale',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> fontSizeScaleBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'fontSizeScale',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
       QAfterFilterCondition> hasCompletedOnboardingEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'hasCompletedOnboarding',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> highContrastEnabledEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'highContrastEnabled',
         value: value,
       ));
     });
@@ -372,6 +532,16 @@ extension UserPreferencesModelQueryFilter on QueryBuilder<UserPreferencesModel,
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'notificationsEnabled',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> reduceMotionEnabledEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'reduceMotionEnabled',
         value: value,
       ));
     });
@@ -699,6 +869,62 @@ extension UserPreferencesModelQueryLinks on QueryBuilder<UserPreferencesModel,
 extension UserPreferencesModelQuerySortBy
     on QueryBuilder<UserPreferencesModel, UserPreferencesModel, QSortBy> {
   QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByAutoSyncEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'autoSyncEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByAutoSyncEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'autoSyncEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByCloudSyncEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'cloudSyncEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByCloudSyncEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'cloudSyncEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByDeviceTrackingEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'deviceTrackingEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByDeviceTrackingEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'deviceTrackingEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByFontSizeScale() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fontSizeScale', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByFontSizeScaleDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fontSizeScale', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
       sortByHasCompletedOnboarding() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'hasCompletedOnboarding', Sort.asc);
@@ -709,6 +935,20 @@ extension UserPreferencesModelQuerySortBy
       sortByHasCompletedOnboardingDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'hasCompletedOnboarding', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByHighContrastEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'highContrastEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByHighContrastEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'highContrastEnabled', Sort.desc);
     });
   }
 
@@ -737,6 +977,20 @@ extension UserPreferencesModelQuerySortBy
       sortByNotificationsEnabledDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'notificationsEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByReduceMotionEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reduceMotionEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByReduceMotionEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reduceMotionEnabled', Sort.desc);
     });
   }
 
@@ -772,6 +1026,62 @@ extension UserPreferencesModelQuerySortBy
 extension UserPreferencesModelQuerySortThenBy
     on QueryBuilder<UserPreferencesModel, UserPreferencesModel, QSortThenBy> {
   QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByAutoSyncEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'autoSyncEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByAutoSyncEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'autoSyncEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByCloudSyncEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'cloudSyncEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByCloudSyncEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'cloudSyncEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByDeviceTrackingEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'deviceTrackingEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByDeviceTrackingEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'deviceTrackingEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByFontSizeScale() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fontSizeScale', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByFontSizeScaleDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fontSizeScale', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
       thenByHasCompletedOnboarding() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'hasCompletedOnboarding', Sort.asc);
@@ -782,6 +1092,20 @@ extension UserPreferencesModelQuerySortThenBy
       thenByHasCompletedOnboardingDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'hasCompletedOnboarding', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByHighContrastEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'highContrastEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByHighContrastEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'highContrastEnabled', Sort.desc);
     });
   }
 
@@ -828,6 +1152,20 @@ extension UserPreferencesModelQuerySortThenBy
   }
 
   QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByReduceMotionEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reduceMotionEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByReduceMotionEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reduceMotionEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
       thenByThemeMode() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'themeMode', Sort.asc);
@@ -859,9 +1197,44 @@ extension UserPreferencesModelQuerySortThenBy
 extension UserPreferencesModelQueryWhereDistinct
     on QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct> {
   QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct>
+      distinctByAutoSyncEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'autoSyncEnabled');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct>
+      distinctByCloudSyncEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'cloudSyncEnabled');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct>
+      distinctByDeviceTrackingEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'deviceTrackingEnabled');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct>
+      distinctByFontSizeScale() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'fontSizeScale');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct>
       distinctByHasCompletedOnboarding() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'hasCompletedOnboarding');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct>
+      distinctByHighContrastEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'highContrastEnabled');
     });
   }
 
@@ -876,6 +1249,13 @@ extension UserPreferencesModelQueryWhereDistinct
       distinctByNotificationsEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'notificationsEnabled');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct>
+      distinctByReduceMotionEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'reduceMotionEnabled');
     });
   }
 
@@ -903,9 +1283,44 @@ extension UserPreferencesModelQueryProperty on QueryBuilder<
   }
 
   QueryBuilder<UserPreferencesModel, bool, QQueryOperations>
+      autoSyncEnabledProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'autoSyncEnabled');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, bool, QQueryOperations>
+      cloudSyncEnabledProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'cloudSyncEnabled');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, bool, QQueryOperations>
+      deviceTrackingEnabledProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'deviceTrackingEnabled');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, double, QQueryOperations>
+      fontSizeScaleProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'fontSizeScale');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, bool, QQueryOperations>
       hasCompletedOnboardingProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'hasCompletedOnboarding');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, bool, QQueryOperations>
+      highContrastEnabledProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'highContrastEnabled');
     });
   }
 
@@ -920,6 +1335,13 @@ extension UserPreferencesModelQueryProperty on QueryBuilder<
       notificationsEnabledProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'notificationsEnabled');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, bool, QQueryOperations>
+      reduceMotionEnabledProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'reduceMotionEnabled');
     });
   }
 

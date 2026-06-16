@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:ecodcf/core/design_system/app_design_system.dart';
+import 'package:ecodcf/core/routes/app_routes.dart';
+import 'package:ecodcf/features/dashboard/presentation/bloc/dashboard_notifier.dart';
+import 'package:ecodcf/features/dashboard/domain/entities/dashboard_stats.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // In a real app, we would watch a profile provider. 
-    // Here we simulate a loading state for 1 second for the demo.
-    const isLoading = false; // Set to true if watching a future/stream
+    final dashboardAsync = ref.watch(dashboardProvider);
+    final stats = dashboardAsync.maybeWhen(
+      data: (data) => data,
+      orElse: () => const DashboardStats(),
+    );
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,
@@ -19,7 +24,7 @@ class ProfilePage extends ConsumerWidget {
         backgroundColor: Colors.transparent,
       ),
       body: Skeletonizer(
-        enabled: isLoading,
+        enabled: false,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
@@ -41,11 +46,18 @@ class ProfilePage extends ConsumerWidget {
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.grey600),
               ),
               const SizedBox(height: AppSpacing.xl),
-              const _ProfileStats(),
+              _ProfileStats(
+                co2Saved: stats.totalCarbon,
+                level: (stats.dscore / 25).toInt(),
+                xp: stats.challengesCompleted * 100,
+              ),
               const SizedBox(height: AppSpacing.xl),
-              _buildProfileOption(context, Icons.badge, 'My Badges', '12 Unlocked'),
-              _buildProfileOption(context, Icons.history, 'Activity History', 'View recent tracking'),
-              _buildProfileOption(context, Icons.share, 'Share Impact', 'Tell others about your score'),
+              const _BadgesSection(),
+              const SizedBox(height: AppSpacing.xl),
+              _buildProfileOption(context, Icons.grid_on, 'My Badges', 'View all your achievements'),
+              _buildProfileOption(context, Icons.history, 'Activity History', 'Track your digital footprint'),
+              _buildProfileOption(context, Icons.share, 'Share Impact', 'Spread eco awareness'),
+              _buildProfileOption(context, Icons.settings, 'Account Settings', 'Privacy, security, preferences'),
             ],
           ),
         ),
@@ -61,23 +73,58 @@ class ProfilePage extends ConsumerWidget {
         title: Text(title),
         subtitle: Text(subtitle),
         trailing: const Icon(Icons.chevron_right),
-        onTap: () {},
+        onTap: () {
+          switch (title) {
+            case 'My Badges':
+              Navigator.pushNamed(context, AppRoutes.badges);
+              break;
+            case 'Activity History':
+              Navigator.pushNamed(context, AppRoutes.activityHistory);
+              break;
+            case 'Share Impact':
+              _showShareDialog(context);
+              break;
+            case 'Account Settings':
+              Navigator.pushNamed(context, AppRoutes.settings);
+              break;
+          }
+        },
+      ),
+    );
+  }
+
+  void _showShareDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Share Your Impact'),
+        content: const Text('Share your digital sustainability achievements with friends and family.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(onPressed: () {
+            Navigator.pop(context);
+          }, child: const Text('Share')),
+        ],
       ),
     );
   }
 }
 
 class _ProfileStats extends StatelessWidget {
-  const _ProfileStats();
+  final double co2Saved;
+  final int level;
+  final int xp;
+
+  const _ProfileStats({required this.co2Saved, required this.level, required this.xp});
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _StatItem(label: 'CO₂ Saved', value: '42.5kg'),
-        _StatItem(label: 'Level', value: '3'),
-        _StatItem(label: 'XP', value: '2,450'),
+        _StatItem(label: 'CO₂ Saved', value: '${co2Saved.toStringAsFixed(1)}kg'),
+        _StatItem(label: 'Level', value: level.toString()),
+        _StatItem(label: 'XP', value: xp.toString()),
       ],
     );
   }
@@ -101,6 +148,62 @@ class _StatItem extends StatelessWidget {
           label,
           style: const TextStyle(fontSize: 12, color: AppColors.grey600),
         ),
+      ],
+    );
+  }
+}
+
+class _BadgesSection extends StatelessWidget {
+  const _BadgesSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Recent Badges', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: AppSpacing.md),
+        SizedBox(
+          height: 80,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              _BadgeItem(icon: Icons.emoji_events, label: 'Challenge Master'),
+              const SizedBox(width: AppSpacing.md),
+              _BadgeItem(icon: Icons.local_florist, label: 'Green Thumb'),
+              const SizedBox(width: AppSpacing.md),
+              _BadgeItem(icon: Icons.speed, label: 'Power Saver'),
+              const SizedBox(width: AppSpacing.md),
+              _BadgeItem(icon: Icons.water, label: 'Eco Warrior'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BadgeItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _BadgeItem({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            color: AppColors.forestGreen.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: AppColors.forestGreen, size: 28),
+        ),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 10), textAlign: TextAlign.center),
       ],
     );
   }

@@ -24,7 +24,7 @@ final userPreferencesRepositoryProvider =
 
 typedef UserPreferencesRepositoryRef
     = FutureProviderRef<UserPreferencesRepository>;
-String _$userPreferencesHash() => r'2b4841b98a09172c303c69efff41fd5735774f2c';
+String _$userPreferencesHash() => r'7110e4c6ae5caaf3f33420b12bac9379d85e3541';
 
 /// See also [UserPreferences].
 @ProviderFor(UserPreferences)

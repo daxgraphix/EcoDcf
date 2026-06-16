@@ -1,19 +1,24 @@
 import 'package:ecodcf/features/sustainability/domain/entities/lesson.dart';
 import 'package:ecodcf/features/sustainability/domain/repositories/lessons_repository.dart';
 import 'package:ecodcf/features/sustainability/data/datasources/sustainability_mock_data.dart';
+import 'package:ecodcf/features/sustainability/data/datasources/training_ground_data.dart';
 
 class LessonsRepositoryImpl implements LessonsRepository {
   @override
   Future<List<Lesson>> getAllLessons() async {
     // Simulate slight delay for professional feel
     await Future.delayed(const Duration(milliseconds: 300));
-    return SustainabilityMockData.getExtendedLessons();
+    final mock = SustainabilityMockData.getExtendedLessons();
+    final training = TrainingGroundData.missions;
+    return [...training, ...mock];
   }
 
   @override
   Future<List<Lesson>> getLessonsByCategory(String categoryId) async {
     final all = await getAllLessons();
-    return all.where((l) => l.category.toLowerCase() == categoryId.toLowerCase()).toList();
+    return all
+        .where((l) => l.category.toLowerCase() == categoryId.toLowerCase())
+        .toList();
   }
 
   @override
@@ -27,4 +32,3 @@ class LessonsRepositoryImpl implements LessonsRepository {
     // Implement persistence (Isar) here if needed
   }
 }
-

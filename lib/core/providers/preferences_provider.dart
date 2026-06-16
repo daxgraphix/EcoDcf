@@ -31,6 +31,32 @@ class UserPreferences extends _$UserPreferences {
     ref.invalidateSelf();
   }
 
+  Future<void> updateAccessibility({
+    double? fontSizeScale,
+    bool? highContrast,
+    bool? reduceMotion,
+  }) async {
+    await _repository.updateAccessibility(
+      fontSizeScale: fontSizeScale,
+      highContrast: highContrast,
+      reduceMotion: reduceMotion,
+    );
+    ref.invalidateSelf();
+  }
+
+  Future<void> updateCarbonTracking({
+    bool? deviceTracking,
+    bool? cloudSync,
+    bool? autoSync,
+  }) async {
+    await _repository.updateCarbonTracking(
+      deviceTracking: deviceTracking,
+      cloudSync: cloudSync,
+      autoSync: autoSync,
+    );
+    ref.invalidateSelf();
+  }
+
   Future<void> updateName(String name) async {
     await _repository.updateUserName(name);
     ref.invalidateSelf();

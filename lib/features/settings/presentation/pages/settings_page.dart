@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ecodcf/core/design_system/app_design_system.dart';
-import 'package:ecodcf/core/services/permissions/accessibility_service.dart';
-import 'package:ecodcf/core/services/permissions/permission_service.dart';
 import 'package:ecodcf/core/routes/app_routes.dart';
-import 'package:ecodcf/core/providers/app_provider.dart';
 import 'package:ecodcf/core/providers/preferences_provider.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -13,136 +10,184 @@ class SettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: AppColors.offWhite,
-      appBar: AppBar(
-        title: const Text('Settings'),
-        backgroundColor: Colors.transparent,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          _SettingsSection(
-            title: 'Account',
-            items: [
-              _SettingsItem(icon: Icons.person, title: 'Profile', onTap: () {}),
-              _SettingsItem(icon: Icons.notifications, title: 'Notifications', onTap: () {}),
-              _SettingsItem(
-                icon: Icons.security,
-                title: 'Privacy & Security',
-                onTap: () => context.go('${AppRoutes.settings}/${AppRoutes.privacyCenter.replaceAll("/", "")}'),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          _SettingsSection(
-            title: 'Accessibility',
-            items: [
-              _SettingsItem(icon: Icons.text_format, title: 'Font Size', onTap: () => _showFontSizeDialog(context, ref)),
-              _SettingsItem(icon: Icons.contrast, title: 'High Contrast', onTap: () => _toggleHighContrast(context, ref)),
-              _SettingsItem(icon: Icons.animation, title: 'Reduce Motion', onTap: () => _toggleReduceMotion(context, ref)),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          _SettingsSection(
-            title: 'Carbon Tracking',
-            items: [
-              _SettingsItem(icon: Icons.devices, title: 'Device Tracking', onTap: () => _requestPermissions(context, ref)),
-              _SettingsItem(icon: Icons.cloud, title: 'Cloud Sync', onTap: () {}),
-              _SettingsItem(icon: Icons.sync, title: 'Auto Sync', onTap: () {}),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          _SettingsSection(
-            title: 'App',
-            items: [
-              _SettingsItem(
-                icon: Icons.dark_mode,
-                title: 'Dark Mode',
-                trailing: Switch(
-                  value: ref.watch(appThemeProvider) == 'dark',
-                  onChanged: (value) {
-                    ref.read(userPreferencesProvider.notifier).updateTheme(value ? 'dark' : 'light');
-                  },
+    final prefsAsync = ref.watch(userPreferencesProvider);
+
+    return prefsAsync.when(
+      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (err, stack) => Scaffold(body: Center(child: Text('Error: $err'))),
+      data: (prefs) => Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(
+          title: const Text('Settings'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          children: [
+            _SettingsSection(
+              title: 'Account',
+              items: [
+                _SettingsItem(
+                  icon: Icons.person,
+                  title: 'Profile',
+                  subtitle: prefs.userName ?? 'Set up your name',
+                  onTap: () => _showNameDialog(context, ref, prefs.userName),
                 ),
-                onTap: () {
-                  final current = ref.read(appThemeProvider);
-                  ref.read(userPreferencesProvider.notifier).updateTheme(current == 'dark' ? 'light' : 'dark');
-                },
-              ),
-              _SettingsItem(icon: Icons.notifications_active, title: 'Reminders', onTap: () {}),
-              _SettingsItem(icon: Icons.info, title: 'About', onTap: () {}),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          SizedBox(
-            height: 44,
-            child: TextButton(
-              onPressed: () {},
-              child: const Text('Log Out', style: TextStyle(color: AppColors.error)),
+                _SettingsItem(
+                  icon: Icons.notifications,
+                  title: 'Notifications',
+                  trailing: Switch(
+                    value: prefs.notificationsEnabled,
+                    onChanged: (val) {
+                      // Logic for notification toggle
+                    },
+                  ),
+                  onTap: () {},
+                ),
+                _SettingsItem(
+                  icon: Icons.security,
+                  title: 'Privacy & Security',
+                  onTap: () => context.go('${AppRoutes.settings}/${AppRoutes.privacyCenter.replaceAll("/", "")}'),
+                ),
+              ],
             ),
+            const SizedBox(height: AppSpacing.xl),
+            _SettingsSection(
+              title: 'Accessibility',
+              items: [
+                _SettingsItem(
+                  icon: Icons.text_format,
+                  title: 'Font Size',
+                  subtitle: '${(prefs.fontSizeScale * 100).toInt()}%',
+                  onTap: () => _showFontSizeDialog(context, ref, prefs.fontSizeScale),
+                ),
+                _SettingsItem(
+                  icon: Icons.contrast,
+                  title: 'High Contrast',
+                  trailing: Switch(
+                    value: prefs.highContrastEnabled,
+                    onChanged: (val) => ref.read(userPreferencesProvider.notifier).updateAccessibility(highContrast: val),
+                  ),
+                  onTap: () {},
+                ),
+                _SettingsItem(
+                  icon: Icons.animation,
+                  title: 'Reduce Motion',
+                  trailing: Switch(
+                    value: prefs.reduceMotionEnabled,
+                    onChanged: (val) => ref.read(userPreferencesProvider.notifier).updateAccessibility(reduceMotion: val),
+                  ),
+                  onTap: () {},
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            _SettingsSection(
+              title: 'Carbon Tracking',
+              items: [
+                _SettingsItem(
+                  icon: Icons.devices,
+                  title: 'Device Tracking',
+                  subtitle: 'Monitor hardware emissions',
+                  trailing: Switch(
+                    value: prefs.deviceTrackingEnabled,
+                    onChanged: (val) => ref.read(userPreferencesProvider.notifier).updateCarbonTracking(deviceTracking: val),
+                  ),
+                  onTap: () {},
+                ),
+                _SettingsItem(
+                  icon: Icons.cloud,
+                  title: 'Cloud Sync',
+                  trailing: Switch(
+                    value: prefs.cloudSyncEnabled,
+                    onChanged: (val) => ref.read(userPreferencesProvider.notifier).updateCarbonTracking(cloudSync: val),
+                  ),
+                  onTap: () {},
+                ),
+                _SettingsItem(
+                  icon: Icons.sync,
+                  title: 'Auto Sync',
+                  trailing: Switch(
+                    value: prefs.autoSyncEnabled,
+                    onChanged: (val) => ref.read(userPreferencesProvider.notifier).updateCarbonTracking(autoSync: val),
+                  ),
+                  onTap: () {},
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            _SettingsSection(
+              title: 'App',
+              items: [
+                _SettingsItem(icon: Icons.notifications_active, title: 'Reminders', onTap: () {}),
+                _SettingsItem(icon: Icons.info, title: 'About', onTap: () {}),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showNameDialog(BuildContext context, WidgetRef ref, String? currentName) {
+    final controller = TextEditingController(text: currentName);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Update Name'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: "Enter your name"),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              ref.read(userPreferencesProvider.notifier).updateName(controller.text);
+              Navigator.pop(context);
+            },
+            child: const Text('Save'),
           ),
         ],
       ),
     );
   }
 
-  void _showFontSizeDialog(BuildContext context, WidgetRef ref) {
-    final service = AccessibilityService();
+  void _showFontSizeDialog(BuildContext context, WidgetRef ref, double currentScale) {
     showDialog(
       context: context,
-      builder: (context) => FutureBuilder<double>(
-        future: service.getFontSizeScale(),
-        builder: (context, snapshot) {
-          final currentScale = snapshot.data ?? 1.0;
-          return AlertDialog(
-            title: const Text('Font Size Scale'),
-            content: Slider(
-              value: currentScale,
-              min: 0.8,
-              max: 2.0,
-              divisions: 12,
-              onChanged: (value) async {
-                await service.setFontSizeScale(value);
-              },
-            ),
-            actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
-          );
-        },
+      builder: (context) => AlertDialog(
+        title: const Text('Font Size Scale'),
+        content: StatefulBuilder(
+          builder: (context, setState) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('${(currentScale * 100).toInt()}%', style: TextStyle(fontSize: 16 * currentScale)),
+              Slider(
+                value: currentScale,
+                min: 0.8,
+                max: 1.5,
+                divisions: 7,
+                onChanged: (value) {
+                  setState(() => currentScale = value);
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              ref.read(userPreferencesProvider.notifier).updateAccessibility(fontSizeScale: currentScale);
+              Navigator.pop(context);
+            },
+            child: const Text('Save'),
+          ),
+        ],
       ),
     );
-  }
-
-  Future<void> _toggleHighContrast(BuildContext context, WidgetRef ref) async {
-    final service = AccessibilityService();
-    final current = await service.getHighContrast();
-    await service.setHighContrast(!current);
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(!current ? 'High contrast enabled' : 'High contrast disabled')),
-      );
-    }
-  }
-
-  Future<void> _toggleReduceMotion(BuildContext context, WidgetRef ref) async {
-    final service = AccessibilityService();
-    final current = await service.getReduceMotion();
-    await service.setReduceMotion(!current);
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(!current ? 'Reduce motion enabled' : 'Reduce motion disabled')),
-      );
-    }
-  }
-
-  Future<void> _requestPermissions(BuildContext context, WidgetRef ref) async {
-    final service = PermissionService();
-    final granted = await service.requestNotificationPermission();
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(granted ? 'Notification permission granted' : 'Permission denied')),
-      );
-    }
   }
 }
 
@@ -168,12 +213,14 @@ class _SettingsSection extends StatelessWidget {
 class _SettingsItem extends StatelessWidget {
   final IconData icon;
   final String title;
+  final String? subtitle;
   final VoidCallback onTap;
   final Widget? trailing;
 
   const _SettingsItem({
     required this.icon,
     required this.title,
+    this.subtitle,
     required this.onTap,
     this.trailing,
   });
@@ -182,8 +229,9 @@ class _SettingsItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: Icon(icon, color: AppColors.forestGreen),
-      title: Text(title),
-      trailing: trailing ?? const Icon(Icons.chevron_right),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+      subtitle: subtitle != null ? Text(subtitle!) : null,
+      trailing: trailing ?? const Icon(Icons.chevron_right, size: 20),
       onTap: onTap,
     );
   }

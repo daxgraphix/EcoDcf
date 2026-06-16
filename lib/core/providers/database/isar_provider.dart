@@ -7,6 +7,8 @@ import 'package:ecodcf/features/challenges/data/models/challenge_model.dart';
 import 'package:ecodcf/features/gamification/data/models/badge_model.dart';
 import 'package:ecodcf/core/database/isar/models/user_preferences_model.dart';
 
+import 'package:ecodcf/features/sustainability/data/models/lesson_progress_model.dart';
+
 part 'isar_provider.g.dart';
 
 @Riverpod(keepAlive: true)
@@ -28,6 +30,7 @@ class IsarProvider {
         ChallengeModelSchema,
         BadgeModelSchema,
         UserPreferencesModelSchema,
+        LessonProgressModelSchema,
       ],
       directory: dir.path,
     );

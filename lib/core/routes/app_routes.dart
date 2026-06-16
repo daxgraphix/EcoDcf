@@ -14,4 +14,6 @@ class AppRoutes {
   static const String privacyCenter = '/privacy-center';
   static const String profile = '/profile';
   static const String permissionsOnboarding = '/permissions-onboarding';
+  static const String badges = '/badges';
+  static const String activityHistory = '/activity-history';
 }

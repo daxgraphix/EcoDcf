@@ -5,25 +5,19 @@ import 'package:ecodcf/core/design_system/colors/app_colors.dart';
 import 'package:ecodcf/features/sustainability/presentation/notifiers/academy_notifier.dart';
 
 class LessonDetailPage extends ConsumerWidget {
-  const LessonDetailPage({super.key});
+  final Lesson? lesson;
+  const LessonDetailPage({super.key, this.lesson});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(academyProvider);
-    final lessonId = ModalRoute.of(context)?.settings.arguments as String? ?? '';
-    final lesson = state.lessons.isEmpty
-        ? const Lesson(id: '', title: '', description: '', content: '', category: '', durationMinutes: 0, icon: '')
-        : state.lessons.firstWhere((l) => l.id == lessonId, orElse: () => state.lessons.first);
+    if (lesson == null) {
+      return const Scaffold(body: Center(child: Text('Lesson not found')));
+    }
 
     return _LessonView(
-      lesson: lesson,
-      onQuizComplete: (score) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Quiz Score: $score%')),
-        );
-      },
+      lesson: lesson!,
       onMarkComplete: () {
-        ref.read(academyProvider.notifier).markLessonCompleted(lesson.id);
+        ref.read(academyProvider.notifier).markLessonCompleted(lesson!.id);
       },
     );
   }
@@ -31,19 +25,56 @@ class LessonDetailPage extends ConsumerWidget {
 
 class _LessonView extends StatefulWidget {
   final Lesson lesson;
-  final Function(int score) onQuizComplete;
   final VoidCallback onMarkComplete;
 
-  const _LessonView({required this.lesson, required this.onQuizComplete, required this.onMarkComplete});
+  const _LessonView({
+    required this.lesson,
+    required this.onMarkComplete,
+  });
 
   @override
   State<_LessonView> createState() => _LessonViewState();
 }
 
 class _LessonViewState extends State<_LessonView> {
-  int _currentSectionIndex = 0;
-  int? _selectedAnswer;
-  int _quizScore = 0;
+  final PageController _pageController = PageController();
+  int _currentStep = 0; // 0 to n-1 are sections, n is quiz
+  int? _selectedQuizAnswer;
+  bool _quizSubmitted = false;
+  bool _isCorrect = false;
+
+  int get _totalSections => widget.lesson.sections.length;
+  bool get _hasQuiz => widget.lesson.quizzes.isNotEmpty;
+  int get _totalSteps => _totalSections + (_hasQuiz ? 1 : 0);
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _nextStep() {
+    if (_currentStep < _totalSteps - 1) {
+      setState(() {
+        _currentStep++;
+      });
+      _pageController.animateToPage(
+        _currentStep,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      // Completed all steps
+      widget.onMarkComplete();
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Mission "${widget.lesson.title}" Completed!'),
+          backgroundColor: AppColors.forestGreen,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,150 +83,301 @@ class _LessonViewState extends State<_LessonView> {
       appBar: AppBar(
         title: Text(widget.lesson.title),
         backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: AppColors.forestGreen,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Container(
+      body: Column(
+        children: [
+          // Progress Indicator
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: Row(
+              children: List.generate(_totalSteps, (index) {
+                return Expanded(
+                  child: Container(
+                    height: 4,
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    decoration: BoxDecoration(
+                      color: index <= _currentStep
+                          ? AppColors.forestGreen
+                          : AppColors.grey300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                ...widget.lesson.sections
+                    .map((section) => _buildSection(section)),
+                if (_hasQuiz) _buildQuiz(widget.lesson.quizzes.first),
+              ],
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: SizedBox(
               width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: (_currentStep == _totalSteps - 1 &&
+                        _hasQuiz &&
+                        !_quizSubmitted)
+                    ? (_selectedQuizAnswer != null ? _submitQuiz : null)
+                    : _nextStep,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.forestGreen,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  _currentStep < _totalSections - 1
+                      ? 'Next: ${widget.lesson.sections[_currentStep + 1].title}'
+                      : (_currentStep == _totalSections - 1 && _hasQuiz)
+                          ? 'Start Quiz'
+                          : (_currentStep == _totalSteps - 1 && _quizSubmitted)
+                              ? 'Finish Mission'
+                              : 'Complete Mission',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection(LessonSection section) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.forestGreen.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              section.title.toUpperCase(),
+              style: const TextStyle(
+                color: AppColors.forestGreen,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _getSectionEmoji(section.title),
+            style: const TextStyle(fontSize: 48),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            section.content,
+            style: const TextStyle(
+              fontSize: 18,
+              height: 1.6,
+              color: AppColors.grey800,
+            ),
+          ),
+          if (section.imageUrl != null) ...[
+            const SizedBox(height: 24),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset(section.imageUrl!),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  String _getSectionEmoji(String title) {
+    final t = title.toLowerCase();
+    if (t.contains('briefing')) return '📋';
+    if (t.contains('learn')) return '💡';
+    if (t.contains('field')) return '🚀';
+    return '📖';
+  }
+
+  Widget _buildQuiz(Quiz quiz) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'FINAL CHALLENGE',
+            style: TextStyle(
+              color: AppColors.forestGreen,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            quiz.question,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: AppColors.grey900,
+            ),
+          ),
+          const SizedBox(height: 32),
+          ...quiz.options.asMap().entries.map((entry) {
+            final index = entry.key;
+            final option = entry.value;
+            final isSelected = _selectedQuizAnswer == index;
+
+            Color borderColor = AppColors.grey300;
+            Color bgColor = Colors.white;
+
+            if (_quizSubmitted) {
+              if (index == quiz.correctAnswerIndex) {
+                borderColor = AppColors.forestGreen;
+                bgColor = AppColors.forestGreen.withOpacity(0.1);
+              } else if (isSelected && index != quiz.correctAnswerIndex) {
+                borderColor = Colors.red;
+                bgColor = Colors.red.withOpacity(0.1);
+              }
+            } else if (isSelected) {
+              borderColor = AppColors.forestGreen;
+              bgColor = AppColors.forestGreen.withOpacity(0.05);
+            }
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: InkWell(
+                onTap: _quizSubmitted
+                    ? null
+                    : () {
+                        setState(() {
+                          _selectedQuizAnswer = index;
+                        });
+                      },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    border: Border.all(color: borderColor, width: 2),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          option.text,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? AppColors.forestGreen
+                                : AppColors.grey800,
+                          ),
+                        ),
+                      ),
+                      if (_quizSubmitted && index == quiz.correctAnswerIndex)
+                        const Icon(Icons.check_circle,
+                            color: AppColors.forestGreen)
+                      else if (_quizSubmitted &&
+                          isSelected &&
+                          index != quiz.correctAnswerIndex)
+                        const Icon(Icons.cancel, color: Colors.red)
+                      else if (!_quizSubmitted)
+                        Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppColors.forestGreen
+                                  : AppColors.grey400,
+                              width: 2,
+                            ),
+                          ),
+                          child: isSelected
+                              ? Center(
+                                  child: Container(
+                                    width: 12,
+                                    height: 12,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: AppColors.forestGreen,
+                                    ),
+                                  ),
+                                )
+                              : null,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+          if (_quizSubmitted) ...[
+            const SizedBox(height: 24),
+            Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.forestGreen,
-                borderRadius: BorderRadius.circular(16),
+                color: _isCorrect
+                    ? AppColors.forestGreen.withOpacity(0.1)
+                    : Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(
-                    widget.lesson.title,
-                    style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                  Icon(
+                    _isCorrect ? Icons.stars : Icons.info_outline,
+                    color: _isCorrect ? AppColors.forestGreen : Colors.red,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.lesson.description,
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.9)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _isCorrect
+                          ? 'Excellent! You\'ve mastered this mission.'
+                          : 'Not quite right, but you\'ve learned something new! Keep going.',
+                      style: TextStyle(
+                        color: _isCorrect
+                            ? AppColors.forestGreen
+                            : Colors.red[900],
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Text('${widget.lesson.durationMinutes} minutes', style: TextStyle(color: Colors.white.withValues(alpha: 0.8))),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: _buildContent(),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (widget.lesson.quizzes.isNotEmpty) {
-                    _showQuizDialog();
-                  } else {
-                    widget.onMarkComplete();
-                    Navigator.pop(context);
-                  }
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.forestGreen),
-                child: Text(widget.lesson.quizzes.isNotEmpty ? 'Take Quiz' : 'Mark as Complete'),
-              ),
-            ),
           ],
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildContent() {
-    if (widget.lesson.sections.isNotEmpty) {
-      final section = widget.lesson.sections[_currentSectionIndex];
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(section.title, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 12),
-          Text(section.content, style: Theme.of(context).textTheme.bodyMedium),
-          if (section.imageUrl != null) ...[
-            const SizedBox(height: 12),
-            Image.asset(section.imageUrl!, height: 120),
-          ],
-          if (widget.lesson.sections.length > 1) ...[
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                widget.lesson.sections.length,
-                (i) => Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _currentSectionIndex == i ? AppColors.forestGreen : Colors.grey[300],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ],
-      );
-    }
-    return SingleChildScrollView(child: Text(widget.lesson.content));
-  }
-
-  void _showQuizDialog() {
-    final quiz = widget.lesson.quizzes.first;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Quiz: ${quiz.question}'),
-        content: RadioGroup<int>(
-          groupValue: _selectedAnswer,
-          onChanged: (value) => setState(() => _selectedAnswer = value),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: quiz.options.asMap().map((i, option) {
-              return MapEntry(
-                i,
-                RadioListTile<int>.adaptive(
-                  title: Text(option.text),
-                  value: i,
-                ),
-              );
-            }).values.toList(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: _selectedAnswer == null
-                ? null
-                : () {
-                    final isCorrect = _selectedAnswer == quiz.correctAnswerIndex;
-                    if (isCorrect) _quizScore += quiz.options.length;
-                    Navigator.pop(context);
-                    if (_currentSectionIndex < widget.lesson.sections.length - 1) {
-                      setState(() => _currentSectionIndex++);
-                    } else {
-                      final totalScore = (_quizScore / widget.lesson.quizzes.fold(0, (sum, q) => sum + q.options.length) * 100).round();
-                      widget.onQuizComplete(totalScore);
-                      widget.onMarkComplete();
-                      Navigator.pop(context);
-                    }
-                  },
-            child: const Text('Next'),
-          ),
-        ],
-      ),
-    );
+  void _submitQuiz() {
+    setState(() {
+      _quizSubmitted = true;
+      _isCorrect =
+          _selectedQuizAnswer == widget.lesson.quizzes.first.correctAnswerIndex;
+    });
   }
 }

@@ -1,5 +1,3 @@
-import com.android.build.gradle.LibraryExtension
-
 allprojects {
     repositories {
         google()
@@ -17,12 +15,23 @@ subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
+
+// subprojects {
+//    project.evaluationDependsOn(":app")
+// }
+
 subprojects {
-    project.evaluationDependsOn(":app")
+    afterEvaluate {
+        if (project.hasProperty("android")) {
+            val android = project.property("android") as com.android.build.gradle.BaseExtension
+            android.compileSdkVersion(35)
+        }
+    }
 }
+
 subprojects {
     plugins.withId("com.android.library") {
-        extensions.configure<LibraryExtension>("android") {
+        extensions.configure<com.android.build.gradle.LibraryExtension>("android") {
             if (project.name == "isar_flutter_libs") {
                 namespace = "dev.isar.isar_flutter_libs"
             }

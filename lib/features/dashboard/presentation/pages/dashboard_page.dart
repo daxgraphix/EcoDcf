@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ecodcf/core/design_system/app_design_system.dart';
-import 'package:ecodcf/core/presentation/widgets/eco_ring.dart';
 import 'package:ecodcf/core/presentation/widgets/error_view.dart';
 import 'package:ecodcf/features/dashboard/presentation/bloc/dashboard_notifier.dart';
 import 'package:ecodcf/core/utils/impact_equivalency_converter.dart';
+import 'package:ecodcf/features/challenges/providers/challenges_providers.dart';
+import 'package:ecodcf/features/dashboard/domain/entities/dashboard_stats.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -26,28 +26,30 @@ class DashboardPage extends ConsumerWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+children: [
                   const _HeaderWidget(),
                   const SizedBox(height: AppSpacing.xl),
                   _DScoreRingWidget(
                     score: stats.dscore,
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-                  _CarbonImpactWidget(
-                    carbon: stats.todayCarbon,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
+const SizedBox(height: AppSpacing.xl),
                   _ImpactEquivalencyList(
                     carbon: stats.todayCarbon,
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  _AnalyticsSummaryWidget(
+                    stats: stats,
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   _DeviceUsageWidget(
                     hours: stats.todayUsageHours,
                   ),
                   const SizedBox(height: AppSpacing.xl),
-                  const _QuickActionsWidget(),
+                  const _ManualFootprintSection(),
                   const SizedBox(height: AppSpacing.xl),
-                  const _ChallengesWidget(),
+                  const _PermissionsTrackerWidget(),
+                  const SizedBox(height: AppSpacing.xl),
+                  const _FixedChallengesWidget(),
                 ],
               ),
             ),
@@ -119,32 +121,70 @@ class _DScoreRingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final level = _getScoreLevel(score);
+    final color = _getScoreColor(score);
+    final progress = (score / 100).clamp(0.0, 1.0);
     return Column(
       children: [
-        Center(
-          child: DScoreRing(
-            score: score,
-            level: level,
-          ),
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              width: 200,
+              height: 200,
+              child: const CircularProgressIndicator(
+                value: 1,
+                strokeWidth: 12,
+                backgroundColor: AppColors.grey200,
+              ),
+            ),
+            SizedBox(
+              width: 200,
+              height: 200,
+              child: CircularProgressIndicator(
+                value: progress,
+                strokeWidth: 12,
+                backgroundColor: Colors.transparent,
+                color: color,
+              ),
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  score.toStringAsFixed(0),
+                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  level,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.grey600,
+                      ),
+                ),
+              ],
+            ),
+          ],
         ),
         const SizedBox(height: AppSpacing.md),
-        Text(
-          level,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: _getScoreColor(score),
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-          child: Text(
-            'Keep up the good work! Your digital habits are improving.',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.grey600,
-                ),
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              'Digital Sustainability Score',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: AppColors.grey600,
+                  ),
+            ),
+          ],
         ),
       ],
     );
@@ -172,35 +212,64 @@ class _CarbonImpactWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return EcoCard(
-      child: Row(
+      onTap: () => context.push('/analytics'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: AppColors.ecoBlue.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.co2, color: AppColors.ecoBlue, size: 32),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Today\'s Carbon', style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: AppSpacing.xs),
-                Text('kg CO₂e', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.grey600)),
-              ],
-            ),
-          ),
-          Text(
-            carbon.toStringAsFixed(2),
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.ecoBlue,
+          Row(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: AppColors.ecoBlue.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
                 ),
+                child: const Icon(Icons.co2, color: AppColors.ecoBlue, size: 32),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Today\'s Carbon', style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text('kg CO₂e', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.grey600)),
+                  ],
+                ),
+              ),
+              Text(
+                carbon.toStringAsFixed(2),
+                style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.ecoBlue,
+                    ),
+              ),
+            ],
           ),
+          const SizedBox(height: AppSpacing.md),
+          Stack(
+            children: [
+              Container(
+                height: 8,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppColors.grey200,
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+              ),
+              Container(
+                height: 8,
+                width: (carbon / 50).clamp(0.0, 1.0) * MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  color: AppColors.ecoBlue,
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text('Goal: 50kg CO₂e', style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.grey600)),
         ],
       ),
     );
@@ -214,37 +283,66 @@ class _DeviceUsageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return EcoCard(
-      child: Row(
+      onTap: () => context.push('/analytics'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: AppColors.leafGreen.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.phone_android, color: AppColors.leafGreen, size: 32),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Device Usage', style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  '${hours.toStringAsFixed(1)} active hours today',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.grey600),
+          Row(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: AppColors.leafGreen.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
                 ),
-              ],
-            ),
-          ),
-          Text(
-            '${hours.toStringAsFixed(1)}h',
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.leafGreen,
+                child: const Icon(Icons.phone_android, color: AppColors.leafGreen, size: 32),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Device Usage', style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      '${hours.toStringAsFixed(1)} active hours today',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.grey600),
+                    ),
+                  ],
                 ),
+              ),
+              Text(
+                '${hours.toStringAsFixed(1)}h',
+                style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.leafGreen,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Screen Time', style: Theme.of(context).textTheme.labelSmall),
+                    Text('2h 30m', style: Theme.of(context).textTheme.titleSmall),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Apps Used', style: Theme.of(context).textTheme.labelSmall),
+                    Text('12 apps', style: Theme.of(context).textTheme.titleSmall),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -252,65 +350,240 @@ class _DeviceUsageWidget extends StatelessWidget {
   }
 }
 
-class _QuickActionsWidget extends StatelessWidget {
-  const _QuickActionsWidget();
+class _FixedChallengesWidget extends ConsumerWidget {
+  const _FixedChallengesWidget();
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Quick Actions', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: AppSpacing.md),
-        Row(
-          children: [
-            const _QuickActionItem(icon: Icons.add, label: 'Track', onTap: null),
-            const SizedBox(width: AppSpacing.md),
-            _QuickActionItem(
-              icon: Icons.emoji_events,
-              label: 'Challenges',
-              onTap: () => context.push('/challenges'),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final challengesAsync = ref.watch(challengesProvider);
+    return challengesAsync.when(
+      data: (challenges) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Active Challenges', style: Theme.of(context).textTheme.titleMedium),
+              TextButton(onPressed: () {}, child: const Text('See All')),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          if (challenges.isEmpty)
+            const EmptyState(
+              title: 'No challenges yet',
+              subtitle: 'Join a challenge to start earning badges!',
+              icon: Icons.star_border,
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: challenges.length,
+              itemBuilder: (context, index) => ListTile(
+                title: Text(challenges[index].title),
+                subtitle: Text(challenges[index].description),
+              ),
             ),
-            const SizedBox(width: AppSpacing.md),
-            _QuickActionItem(
-              icon: Icons.school,
-              label: 'Academy',
-              onTap: () => context.push('/academy'),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            _QuickActionItem(
-              icon: Icons.insights,
-              label: 'Analytics',
-              onTap: () => context.push('/analytics'),
-            ),
-          ],
+        ],
+      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => const EmptyState(
+          icon: Icons.star_border,
+          title: 'Error Loading',
+          subtitle: 'Could not load challenges',
         ),
-      ],
     );
   }
 }
 
-class _ChallengesWidget extends StatelessWidget {
-  const _ChallengesWidget();
+// Interactive Manual Footprint Calculation
+class _ManualFootprintSection extends ConsumerStatefulWidget {
+  const _ManualFootprintSection();
+
+  @override
+  ConsumerState<_ManualFootprintSection> createState() =>
+      _ManualFootprintState();
+}
+
+class _ManualFootprintState extends ConsumerState<_ManualFootprintSection> {
+  final _formKey = GlobalKey<FormState>();
+  String _selectedActivity = '';
+  final List<String> _activityOptions = const [
+    'Social Media Usage',
+    'Commuting',
+    'Energy Consumption',
+    'Dietary Choices'
+  ];
+  List<String> _calculationResults = [];
+
+  void _handleCalculate() {
+    if (_formKey.currentState!.validate() && _selectedActivity.isNotEmpty) {
+      setState(() {
+        _calculationResults = [
+          'Activity: $_selectedActivity',
+          'Impact calculated and added to your footprint',
+        ];
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return EcoCard(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Manual Footprint Calculation', 
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: AppSpacing.md),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedActivity.isNotEmpty ? _selectedActivity : null,
+                items: _activityOptions
+                    .map((option) => DropdownMenuItem(
+                         value: option, child: Text(option)))
+                    .toList(),
+                onChanged: (value) => setState(() => _selectedActivity = value ?? ''),
+                decoration: const InputDecoration(
+                  labelText: 'Select Activity Type',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: 'Hours/Units',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  ElevatedButton(
+                    onPressed: _handleCalculate,
+                    child: const Text('Calculate'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              if (_calculationResults.isNotEmpty)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Recent Calculations:', 
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    for (final result in _calculationResults) ...[
+                      Text(result, style: const TextStyle(color: Colors.green)),
+                      const SizedBox(height: 4),
+                    ],
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Permissions Tracking Widget
+class _PermissionsTrackerWidget extends ConsumerWidget {
+  const _PermissionsTrackerWidget();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return EcoCard(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Permissions Tracking', 
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: AppSpacing.sm),
+            const Text('Manage app permissions for better tracking',
+                style: TextStyle(color: AppColors.grey600)),
+            const SizedBox(height: AppSpacing.md),
+            const ListTile(
+              leading: Icon(Icons.camera),
+              title: Text('Camera Access'),
+              subtitle: Text('For QR code scanning'),
+              trailing: Icon(Icons.check_circle, color: Colors.green),
+            ),
+            const ListTile(
+              leading: Icon(Icons.location_on),
+              title: Text('Location'),
+              subtitle: Text('For local impact tracking'),
+              trailing: Icon(Icons.check_circle, color: Colors.green),
+            ),
+            const ListTile(
+              leading: Icon(Icons.analytics),
+              title: Text('Usage Analytics'),
+              subtitle: Text('For footprint calculation'),
+              trailing: Icon(Icons.check_circle, color: Colors.green),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AnalyticsSummaryWidget extends StatelessWidget {
+  final DashboardStats stats;
+  const _AnalyticsSummaryWidget({required this.stats});
+
+  @override
+  Widget build(BuildContext context) {
+    return EcoCard(
+      onTap: () => context.push('/analytics'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Analytics Summary', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              _SummaryItem(label: 'Weekly Change', value: '${stats.weeklyChange.toStringAsFixed(1)}kg'),
+              const SizedBox(width: AppSpacing.md),
+              _SummaryItem(label: 'Streak', value: '${stats.streakDays} days'),
+              const SizedBox(width: AppSpacing.md),
+              _SummaryItem(label: 'Completed', value: '${stats.challengesCompleted}'),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          LinearProgressIndicator(
+            value: (stats.challengesCompleted / 10).clamp(0.0, 1.0),
+            minHeight: 8,
+            backgroundColor: AppColors.grey200,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text('Challenge Completion: ${stats.challengesCompleted}/10', 
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.grey600)),
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryItem extends StatelessWidget {
+  final String label;
+  final String value;
+  const _SummaryItem({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Active Challenges', style: Theme.of(context).textTheme.titleMedium),
-            TextButton(onPressed: () {}, child: const Text('See All')),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        const EmptyStateView(
-          icon: Icons.star_border,
-          title: 'No challenges yet',
-          message: 'Join a challenge to start earning badges!',
-        ),
+        Text(label, style: const TextStyle(fontSize: 10, color: AppColors.grey600)),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -390,39 +663,6 @@ class _EquivalencyCard extends StatelessWidget {
                   color: AppColors.grey600,
                 ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _QuickActionItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback? onTap;
-
-  const _QuickActionItem({required this.icon, required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        onTap?.call();
-      },
-      child: Column(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: AppColors.forestGreen.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-            ),
-            child: Icon(icon, color: AppColors.forestGreen, size: 24),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(label, style: Theme.of(context).textTheme.labelSmall),
         ],
       ),
     );

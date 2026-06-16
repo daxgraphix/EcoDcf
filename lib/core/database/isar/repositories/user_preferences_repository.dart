@@ -34,6 +34,34 @@ class UserPreferencesRepository {
     });
   }
 
+  Future<void> updateAccessibility({
+    double? fontSizeScale,
+    bool? highContrast,
+    bool? reduceMotion,
+  }) async {
+    final prefs = await getPreferences();
+    await _isar.writeTxn(() async {
+      if (fontSizeScale != null) prefs.fontSizeScale = fontSizeScale;
+      if (highContrast != null) prefs.highContrastEnabled = highContrast;
+      if (reduceMotion != null) prefs.reduceMotionEnabled = reduceMotion;
+      await _isar.userPreferencesModels.put(prefs);
+    });
+  }
+
+  Future<void> updateCarbonTracking({
+    bool? deviceTracking,
+    bool? cloudSync,
+    bool? autoSync,
+  }) async {
+    final prefs = await getPreferences();
+    await _isar.writeTxn(() async {
+      if (deviceTracking != null) prefs.deviceTrackingEnabled = deviceTracking;
+      if (cloudSync != null) prefs.cloudSyncEnabled = cloudSync;
+      if (autoSync != null) prefs.autoSyncEnabled = autoSync;
+      await _isar.userPreferencesModels.put(prefs);
+    });
+  }
+
   Future<void> updateUserName(String name) async {
     final prefs = await getPreferences();
     await _isar.writeTxn(() async {

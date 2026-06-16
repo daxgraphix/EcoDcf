@@ -13,7 +13,7 @@ class AcademyPage extends ConsumerStatefulWidget {
 }
 
 class _AcademyPageState extends ConsumerState<AcademyPage> {
-  String selectedCategoryId = 'digital_sustainability';
+  String selectedCategoryId = 'training';
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class _AcademyPageState extends ConsumerState<AcademyPage> {
           ),
           SliverToBoxAdapter(
             child: SizedBox(
-              height: 130,
+              height: 135,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -46,23 +46,40 @@ class _AcademyPageState extends ConsumerState<AcademyPage> {
                     onTap: () => setState(() => selectedCategoryId = cat.id),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      width: 100,
-                      margin: const EdgeInsets.only(right: AppSpacing.md, top: AppSpacing.md),
+                      width: 110,
+                      margin: const EdgeInsets.only(
+                          right: AppSpacing.md,
+                          top: AppSpacing.md,
+                          bottom: AppSpacing.sm),
                       padding: const EdgeInsets.all(AppSpacing.sm),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.forestGreen : Colors.white,
+                        color:
+                            isSelected ? AppColors.forestGreen : Colors.white,
                         borderRadius: BorderRadius.circular(AppRadius.lg),
                         boxShadow: isSelected
-                            ? [BoxShadow(color: AppColors.forestGreen.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))]
-                            : [],
+                            ? [
+                                BoxShadow(
+                                    color: AppColors.forestGreen
+                                        .withValues(alpha: 0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4))
+                              ]
+                            : [
+                                BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.05),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2))
+                              ],
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             _getIconData(cat.icon),
-                            color: isSelected ? Colors.white : AppColors.forestGreen,
-                            size: 32,
+                            color: isSelected
+                                ? Colors.white
+                                : AppColors.forestGreen,
+                            size: 28,
                           ),
                           const SizedBox(height: AppSpacing.xs),
                           Text(
@@ -71,7 +88,7 @@ class _AcademyPageState extends ConsumerState<AcademyPage> {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 10,
                               fontWeight: FontWeight.bold,
                               color: isSelected ? Colors.white : AppColors.dark,
                             ),
@@ -84,29 +101,53 @@ class _AcademyPageState extends ConsumerState<AcademyPage> {
               ),
             ),
           ),
-          const SliverPadding(
-            padding: EdgeInsets.all(AppSpacing.md),
+          SliverPadding(
+            padding: const EdgeInsets.all(AppSpacing.md),
             sliver: SliverToBoxAdapter(
               child: Text(
-                'Recommended for You',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                selectedCategoryId == 'training'
+                    ? 'Training Ground Missions'
+                    : 'Recommended for You',
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final filteredLessons = academyState.lessons.where((l) => l.category == selectedCategoryId).toList();
-                  if (index >= filteredLessons.length) return null;
-                  final lesson = filteredLessons[index];
-                  return _LessonCard(lesson: lesson);
-                },
-                childCount: academyState.lessons.where((l) => l.category == selectedCategoryId).length,
-              ),
-            ),
-          ),
+          academyState.isLoading
+              ? const SliverToBoxAdapter(
+                  child: Center(
+                      child: Padding(
+                  padding: EdgeInsets.all(AppSpacing.xl),
+                  child: CircularProgressIndicator(),
+                )))
+              : SliverPadding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final filteredLessons = academyState.lessons.where((l) {
+                          final category = academyState.categories.firstWhere(
+                              (c) => c.id == selectedCategoryId,
+                              orElse: () => academyState.categories.first);
+                          return l.category.toLowerCase() ==
+                              category.title.toLowerCase();
+                        }).toList();
+
+                        if (index >= filteredLessons.length) return null;
+                        final lesson = filteredLessons[index];
+                        return _LessonCard(lesson: lesson);
+                      },
+                      childCount: academyState.lessons.where((l) {
+                        final category = academyState.categories.firstWhere(
+                            (c) => c.id == selectedCategoryId,
+                            orElse: () => academyState.categories.first);
+                        return l.category.toLowerCase() ==
+                            category.title.toLowerCase();
+                      }).length,
+                    ),
+                  ),
+                ),
         ],
       ),
     );
@@ -114,13 +155,20 @@ class _AcademyPageState extends ConsumerState<AcademyPage> {
 
   IconData _getIconData(String iconName) {
     switch (iconName) {
-      case 'lightbulb': return Icons.lightbulb_outline;
-      case 'storage': return Icons.storage;
-      case 'smartphone': return Icons.smartphone;
-      case 'cloud': return Icons.cloud_queue;
-      case 'psychology': return Icons.psychology;
-      case 'play_circle': return Icons.play_circle_outline;
-      default: return Icons.book;
+      case 'military_tech':
+        return Icons.military_tech;
+      case 'lightbulb':
+        return Icons.lightbulb_outline;
+      case 'smartphone':
+        return Icons.smartphone;
+      case 'cloud':
+        return Icons.cloud_queue;
+      case 'psychology':
+        return Icons.psychology;
+      case 'play_circle':
+        return Icons.play_circle_outline;
+      default:
+        return Icons.book;
     }
   }
 }
@@ -139,7 +187,8 @@ class _LessonCard extends StatelessWidget {
         side: const BorderSide(color: AppColors.grey200),
       ),
       child: InkWell(
-        onTap: () => GoRouter.of(context).push('/academy/lesson', extra: lesson),
+        onTap: () =>
+            GoRouter.of(context).push('/academy/lesson', extra: lesson),
         borderRadius: BorderRadius.circular(AppRadius.lg),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
@@ -164,25 +213,33 @@ class _LessonCard extends StatelessWidget {
                   children: [
                     Text(
                       lesson.title,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       lesson.description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: AppColors.grey600, fontSize: 13),
+                      style: const TextStyle(
+                          color: AppColors.grey600, fontSize: 13),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Row(
                       children: [
-                        const Icon(Icons.timer_outlined, size: 14, color: AppColors.grey500),
+                        const Icon(Icons.timer_outlined,
+                            size: 14, color: AppColors.grey500),
                         const SizedBox(width: 4),
-                        Text('${lesson.durationMinutes} min', style: const TextStyle(color: AppColors.grey500, fontSize: 12)),
+                        Text('${lesson.durationMinutes} min',
+                            style: const TextStyle(
+                                color: AppColors.grey500, fontSize: 12)),
                         const SizedBox(width: AppSpacing.md),
-                        const Icon(Icons.quiz_outlined, size: 14, color: AppColors.grey500),
+                        const Icon(Icons.quiz_outlined,
+                            size: 14, color: AppColors.grey500),
                         const SizedBox(width: 4),
-                        Text('${lesson.quizzes.length} Quiz', style: const TextStyle(color: AppColors.grey500, fontSize: 12)),
+                        Text('${lesson.quizzes.length} Quiz',
+                            style: const TextStyle(
+                                color: AppColors.grey500, fontSize: 12)),
                       ],
                     ),
                   ],
@@ -198,14 +255,18 @@ class _LessonCard extends StatelessWidget {
 
   IconData _getCategoryIcon(String category) {
     switch (category) {
-      case 'Foundations': return Icons.lightbulb;
-      case 'Data Management': return Icons.storage;
-      case 'Device Care': return Icons.smartphone;
-      case 'Cloud Computing': return Icons.cloud;
-      case 'AI Ethics': return Icons.psychology;
-      case 'Streaming & Media': return Icons.play_circle;
-      default: return Icons.book;
+      case 'Foundations':
+        return Icons.lightbulb;
+      case 'Device Care':
+        return Icons.smartphone;
+      case 'Cloud Computing':
+        return Icons.cloud;
+      case 'AI Ethics':
+        return Icons.psychology;
+      case 'Streaming & Media':
+        return Icons.play_circle;
+      default:
+        return Icons.book;
     }
   }
 }
-
