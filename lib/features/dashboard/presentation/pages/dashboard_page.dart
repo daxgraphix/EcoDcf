@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:ecodcf/features/carbon/presentation/pages/carbon_history_page.dart';
+import 'package:ecodcf/features/device_usage/presentation/pages/device_usage_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ecodcf/core/design_system/app_design_system.dart';
@@ -18,6 +19,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:animations/animations.dart';
 import 'package:ecodcf/core/providers/preferences_provider.dart';
 import 'package:ecodcf/features/dashboard/presentation/widgets/activity_carbon_feed.dart';
+import 'package:go_router/go_router.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -38,7 +40,7 @@ class DashboardPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildScaffold(BuildContext context, WidgetRef ref, DashboardStats stats) {
+Widget _buildScaffold(BuildContext context, WidgetRef ref, DashboardStats stats) {
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -55,7 +57,6 @@ class DashboardPage extends ConsumerWidget {
       ),
       body: Stack(
         children: [
-          // Background Mesh Gradient Effect
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -83,13 +84,11 @@ class DashboardPage extends ConsumerWidget {
                     const _HeaderWidget(),
                     const SizedBox(height: AppSpacing.xl),
                     
-                    // Main Score Section (Bento Box)
                     StaggeredGrid.count(
                       crossAxisCount: 4,
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 16,
                       children: [
-                        // D-Score Gauge (Large)
                         StaggeredGridTile.count(
                           crossAxisCellCount: 4,
                           mainAxisCellCount: 3,
@@ -105,9 +104,9 @@ class DashboardPage extends ConsumerWidget {
                                     Text(
                                       'Digital Sustainability',
                                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 0.5,
-                                      ),
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0.5,
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -122,13 +121,12 @@ class DashboardPage extends ConsumerWidget {
                           ),
                         ),
 
-                        // Device Usage (Medium)
                         StaggeredGridTile.count(
                           crossAxisCellCount: 4,
                           mainAxisCellCount: 2,
                           child: OpenContainer(
                             transitionType: ContainerTransitionType.fadeThrough,
-                            openBuilder: (context, _) => const Scaffold(body: Center(child: Text('Device Usage Details'))),
+                            openBuilder: (context, _) => const DeviceUsagePage(),
                             closedElevation: 0,
                             closedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
                             closedColor: Colors.transparent,
@@ -139,7 +137,6 @@ class DashboardPage extends ConsumerWidget {
                           ),
                         ),
 
-                        // Carbon Saved (Small)
                         StaggeredGridTile.count(
                           crossAxisCellCount: 2,
                           mainAxisCellCount: 2,
@@ -154,7 +151,6 @@ class DashboardPage extends ConsumerWidget {
                           ),
                         ),
 
-                        // History/Streak (Small)
                         StaggeredGridTile.count(
                           crossAxisCellCount: 2,
                           mainAxisCellCount: 2,
@@ -177,7 +173,6 @@ class DashboardPage extends ConsumerWidget {
                           ),
                         ),
 
-                        // Device Breakdown (Large)
                         StaggeredGridTile.count(
                           crossAxisCellCount: 4,
                           mainAxisCellCount: 2,
@@ -187,7 +182,6 @@ class DashboardPage extends ConsumerWidget {
                           ),
                         ),
 
-                        // Community Impact (Medium)
                         StaggeredGridTile.count(
                           crossAxisCellCount: 2,
                           mainAxisCellCount: 2,
@@ -204,7 +198,6 @@ class DashboardPage extends ConsumerWidget {
                           ),
                         ),
 
-                        // Health Interop: Steps Offset (Medium)
                         StaggeredGridTile.count(
                           crossAxisCellCount: 2,
                           mainAxisCellCount: 2,
@@ -214,7 +207,7 @@ class DashboardPage extends ConsumerWidget {
                               label: 'Steps Offset',
                               value: '${stats.todaySteps}',
                               icon: Icons.directions_walk_rounded,
-                              color: AppColors.ecoBlue,
+                              color: AppColors.forestGreen,
                             ),
                           ),
                         ),
@@ -254,37 +247,156 @@ class _HeaderWidget extends ConsumerWidget {
         if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
         if (hour >= 17) greeting = 'Good evening';
 
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '$greeting, $name!',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.forestGreen,
-                      ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$greeting, $name!',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.forestGreen,
+                          ),
+                    ),
+                    Text(
+                      'Your digital footprint is lower than average today.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.grey600,
+                          ),
+                    ),
+                  ],
                 ),
-                Text(
-                  'Your digital footprint is lower than average today.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.grey600,
-                      ),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [AppColors.forestGreen, AppColors.leafGreen],
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.person, color: Colors.white, size: 20),
                 ),
               ],
             ),
-            const CircleAvatar(
-              radius: 24,
-              backgroundColor: AppColors.forestGreen,
-              child: Icon(Icons.person, color: Colors.white),
-            ),
+            const SizedBox(height: AppSpacing.md),
+            const _TopNavBar(),
           ],
         );
       },
       loading: () => const ShimmerLoading(width: 200, height: 50),
       error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _TopNavBar extends StatelessWidget implements PreferredSizeWidget {
+  const _TopNavBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 44,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.forestGreen.withValues(alpha: 0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _QuickActionItem(
+            icon: Icons.add_circle,
+            label: 'Quick Log',
+            onTap: () => _showQuickLogSheet(context),
+          ),
+          _QuickActionItem(
+            icon: Icons.trending_up,
+            label: 'Trend',
+            onTap: () => GoRouter.of(context).go('/analytics'),
+          ),
+          _QuickActionItem(
+            icon: Icons.local_fire_department,
+            label: 'Streak',
+            onTap: () {},
+          ),
+          _QuickActionItem(
+            icon: Icons.emoji_events,
+            label: 'Badges',
+            onTap: () => GoRouter.of(context).go('/profile'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showQuickLogSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const QuickLogBottomSheet(),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(44);
+}
+
+class _QuickActionItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _QuickActionItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.forestGreen.withValues(alpha: 0.2),
+                  AppColors.leafGreen.withValues(alpha: 0.2),
+                ],
+              ),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: AppColors.forestGreen, size: 18),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 9,
+              color: AppColors.grey600,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -378,10 +490,10 @@ class _DeviceUsageContent extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.ecoBlue.withValues(alpha: 0.1),
+            color: AppColors.forestGreen.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.phone_android, color: AppColors.ecoBlue),
+          child: const Icon(Icons.phone_android, color: AppColors.forestGreen),
         ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
@@ -398,7 +510,7 @@ class _DeviceUsageContent extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text('${hours.toStringAsFixed(1)}h', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.ecoBlue, fontWeight: FontWeight.bold)),
+            Text('${hours.toStringAsFixed(1)}h', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.forestGreen, fontWeight: FontWeight.bold)),
             const Text('Today', style: TextStyle(fontSize: 10, color: AppColors.grey600)),
           ],
         ),
@@ -489,8 +601,8 @@ class _DeviceBreakdownWidget extends StatelessWidget {
   Color _getColorFor(String key) {
     switch (key.toLowerCase()) {
       case 'video': return Colors.red;
-      case 'social': return Colors.purple;
-      case 'work': return Colors.blue;
+      case 'social': return Colors.deepPurple;
+      case 'work': return AppColors.forestGreen;
       default: return AppColors.leafGreen;
     }
   }

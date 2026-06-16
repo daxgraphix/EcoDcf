@@ -2,200 +2,82 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ecodcf/core/design_system/app_design_system.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ecodcf/features/sustainability/presentation/notifiers/academy_notifier.dart';
 import 'package:ecodcf/features/sustainability/domain/entities/lesson.dart';
+import 'package:ecodcf/features/sustainability/data/repositories/sustainability_repository_impl.dart';
 
-class AcademyPage extends ConsumerStatefulWidget {
+class AcademyPage extends ConsumerWidget {
   const AcademyPage({super.key});
 
   @override
-  ConsumerState<AcademyPage> createState() => _AcademyPageState();
-}
-
-class _AcademyPageState extends ConsumerState<AcademyPage> {
-  String selectedCategoryId = 'training';
-  final TextEditingController _searchController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(academyProvider.notifier).init();
-    });
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final academyState = ref.watch(academyProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final academyDataAsync = ref.watch(academyDataProvider);
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar.large(
-            title: const Text('Eco Academy'),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () => _showSearchDialog(context),
-              ),
-            ],
+      appBar: AppBar(
+        title: const Text('Eco Academy'),
+        centerTitle: true,
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => _showSearchDialog(context),
           ),
-          SliverToBoxAdapter(
-            child: _buildCategorySelector(academyState),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            sliver: SliverToBoxAdapter(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    selectedCategoryId == 'training'
-                        ? 'Training Ground Missions'
-                        : 'Recommended for You',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.forestGreen.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppSpacing.xs),
-                    ),
-                    child: Text(
-                      '${_getFilteredLessons(academyState).length} Lessons',
-                      style: const TextStyle(
-                        color: AppColors.forestGreen,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          academyState.isLoading
-              ? const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.all(AppSpacing.xl),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                )
-              : SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final filteredLessons = _getFilteredLessons(academyState);
-                        if (index >= filteredLessons.length) return null;
-                        final lesson = filteredLessons[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                          child: _LessonCard(lesson: lesson),
-                        );
-                      },
-                      childCount: _getFilteredLessons(academyState).length,
-                    ),
-                  ),
-                ),
         ],
       ),
-    );
-  }
-
-  List<Lesson> _getFilteredLessons(academyState) {
-    return academyState.lessons.where((l) {
-      final category = academyState.categories.firstWhere(
-        (c) => c.id == selectedCategoryId,
-        orElse: () => academyState.categories.first,
-      );
-      return l.category.toLowerCase() == category.title.toLowerCase();
-    }).toList();
-  }
-
-  Widget _buildCategorySelector(academyState) {
-    return SizedBox(
-      height: 120,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        itemCount: academyState.categories.length,
-        itemBuilder: (context, index) {
-          final cat = academyState.categories[index];
-          final isSelected = selectedCategoryId == cat.id;
-          return GestureDetector(
-            onTap: () => setState(() => selectedCategoryId = cat.id),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              width: 100,
-              margin: const EdgeInsets.only(right: AppSpacing.md),
-              decoration: BoxDecoration(
-                gradient: isSelected
-                    ? const LinearGradient(
-                        colors: [AppColors.forestGreen, AppColors.leafGreen],
-                      )
-                    : null,
-                color: isSelected ? null : Colors.white,
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-                boxShadow: [
-                  BoxShadow(
-                    color: (isSelected
-                            ? AppColors.forestGreen
-                            : Colors.black)
-                        .withValues(alpha: isSelected ? 0.3 : 0.05),
-                    blurRadius: isSelected ? 12 : 4,
-                    offset: const Offset(0, 4),
+      body: academyDataAsync.when(
+        data: (academyData) {
+          final trainingGroundLessons = academyData.lessons.where((l) => l.category == 'Training Ground').toList();
+          return CustomScrollView(
+            slivers: [
+              const SliverPadding(
+                padding: EdgeInsets.all(AppSpacing.md),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Training Ground Missions',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: AppSpacing.sm),
+                      Text(
+                        'Master sustainability through interactive missions',
+                        style: TextStyle(color: AppColors.grey600),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: (isSelected
-                              ? Colors.white
-                              : AppColors.forestGreen)
-                          .withValues(alpha: isSelected ? 0.2 : 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      _getIconData(cat.icon),
-                      color: isSelected ? Colors.white : AppColors.forestGreen,
-                      size: 24,
-                    ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (index >= trainingGroundLessons.length) return null;
+                      final lesson = trainingGroundLessons[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                        child: _LessonCard(lesson: lesson),
+                      );
+                    },
+                    childCount: trainingGroundLessons.length,
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    cat.title,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.white : AppColors.dark,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
           );
         },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
       ),
     );
   }
@@ -205,9 +87,8 @@ class _AcademyPageState extends ConsumerState<AcademyPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Search Lessons'),
-        content: TextField(
-          controller: _searchController,
-          decoration: const InputDecoration(hintText: 'Enter lesson title...'),
+        content: const TextField(
+          decoration: InputDecoration(hintText: 'Enter lesson title...'),
           autofocus: true,
         ),
         actions: [
@@ -216,34 +97,12 @@ class _AcademyPageState extends ConsumerState<AcademyPage> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              // Implement search logic
-              Navigator.pop(context);
-            },
+            onPressed: () => Navigator.pop(context),
             child: const Text('Search'),
           ),
         ],
       ),
     );
-  }
-
-  IconData _getIconData(String iconName) {
-    switch (iconName) {
-      case 'military_tech':
-        return Icons.military_tech;
-      case 'lightbulb':
-        return Icons.lightbulb_outline;
-      case 'smartphone':
-        return Icons.smartphone;
-      case 'cloud':
-        return Icons.cloud_queue;
-      case 'psychology':
-        return Icons.psychology;
-      case 'play_circle':
-        return Icons.play_circle_outline;
-      default:
-        return Icons.book;
-    }
   }
 }
 

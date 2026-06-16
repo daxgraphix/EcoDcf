@@ -25,3 +25,9 @@ Future<List<CarbonRecord>> recentRecords(RecentRecordsRef ref) async {
   return all.take(10).toList();
 }
 
+@riverpod
+Future<CarbonRecord> singleRecord(SingleRecordRef ref, String id) async {
+  final repo = await ref.watch(carbonRepositoryProvider.future);
+  return repo.getRecordById(id);
+}
+

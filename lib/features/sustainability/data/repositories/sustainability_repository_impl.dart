@@ -92,17 +92,30 @@ class SustainabilityRepositoryImpl implements SustainabilityRepository {
   }
 }
 
-final sustainabilityRepositoryProvider =
-    Provider<SustainabilityRepository>((ref) {
-  final isar = ref.watch(isarProvider).value;
-  if (isar == null) throw Exception('Isar not initialized');
+final sustainabilityRepositoryAsyncProvider = FutureProvider<SustainabilityRepository>((ref) async {
+  final isar = await ref.watch(isarProvider.future);
   return SustainabilityRepositoryImpl(isar);
 });
 
-final lessonsProvider = FutureProvider<List<Lesson>>((ref) {
-  return ref.watch(sustainabilityRepositoryProvider).getLessons();
+final lessonsProvider = FutureProvider<List<Lesson>>((ref) async {
+  final repo = await ref.watch(sustainabilityRepositoryAsyncProvider.future);
+  return repo.getLessons();
 });
 
-final categoriesProvider = FutureProvider<List<Category>>((ref) {
-  return ref.watch(sustainabilityRepositoryProvider).getCategories();
+final categoriesProvider = FutureProvider<List<Category>>((ref) async {
+  final repo = await ref.watch(sustainabilityRepositoryAsyncProvider.future);
+  return repo.getCategories();
 });
+
+final academyDataProvider = FutureProvider<AcademyData>((ref) async {
+  final repo = await ref.watch(sustainabilityRepositoryAsyncProvider.future);
+  final lessons = await repo.getLessons();
+  final categories = await repo.getCategories();
+  return AcademyData(lessons: lessons, categories: categories);
+});
+
+class AcademyData {
+  final List<Lesson> lessons;
+  final List<Category> categories;
+  AcademyData({required this.lessons, required this.categories});
+}

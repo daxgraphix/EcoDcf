@@ -49,7 +49,14 @@ class SettingsPage extends ConsumerWidget {
               onChanged: (val) {
                 HapticFeedback.lightImpact();
                 ref.read(userPreferencesProvider.notifier).updateNotifications(val);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Notifications ${val ? 'enabled' : 'disabled'}'), duration: const Duration(milliseconds: 500)),
+                  );
+                }
               },
+              activeTrackColor: AppColors.forestGreen.withValues(alpha: 0.3),
+              activeThumbColor: AppColors.forestGreen,
             ),
           ),
           _SettingsTile(
@@ -61,7 +68,14 @@ class SettingsPage extends ConsumerWidget {
               onChanged: (val) {
                 HapticFeedback.lightImpact();
                 ref.read(userPreferencesProvider.notifier).updateNotifications(prefs.notificationsEnabled, reminders: val);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Reminders ${val ? 'enabled' : 'disabled'}'), duration: const Duration(milliseconds: 500)),
+                  );
+                }
               },
+              activeTrackColor: AppColors.forestGreen.withValues(alpha: 0.3),
+              activeThumbColor: AppColors.forestGreen,
             ),
           ),
           _SettingsTile(
@@ -89,7 +103,14 @@ class SettingsPage extends ConsumerWidget {
               onChanged: (val) {
                 HapticFeedback.lightImpact();
                 ref.read(userPreferencesProvider.notifier).updateAccessibility(highContrast: val);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('High contrast ${val ? 'enabled' : 'disabled'}'), duration: const Duration(milliseconds: 500)),
+                  );
+                }
               },
+              activeTrackColor: AppColors.forestGreen.withValues(alpha: 0.3),
+              activeThumbColor: AppColors.forestGreen,
             ),
           ),
           _SettingsTile(
@@ -101,7 +122,14 @@ class SettingsPage extends ConsumerWidget {
               onChanged: (val) {
                 HapticFeedback.lightImpact();
                 ref.read(userPreferencesProvider.notifier).updateAccessibility(reduceMotion: val);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Reduce motion ${val ? 'enabled' : 'disabled'}'), duration: const Duration(milliseconds: 500)),
+                  );
+                }
               },
+              activeTrackColor: AppColors.forestGreen.withValues(alpha: 0.3),
+              activeThumbColor: AppColors.forestGreen,
             ),
           ),
         ]),
@@ -117,7 +145,14 @@ class SettingsPage extends ConsumerWidget {
               onChanged: (val) {
                 HapticFeedback.lightImpact();
                 ref.read(userPreferencesProvider.notifier).updateCarbonTracking(deviceTracking: val);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Device tracking ${val ? 'enabled' : 'disabled'}'), duration: const Duration(milliseconds: 500)),
+                  );
+                }
               },
+              activeTrackColor: AppColors.forestGreen.withValues(alpha: 0.3),
+              activeThumbColor: AppColors.forestGreen,
             ),
           ),
           _SettingsTile(
@@ -129,7 +164,14 @@ class SettingsPage extends ConsumerWidget {
               onChanged: (val) {
                 HapticFeedback.lightImpact();
                 ref.read(userPreferencesProvider.notifier).updateCarbonTracking(cloudSync: val);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Cloud sync ${val ? 'enabled' : 'disabled'}'), duration: const Duration(milliseconds: 500)),
+                  );
+                }
               },
+              activeTrackColor: AppColors.forestGreen.withValues(alpha: 0.3),
+              activeThumbColor: AppColors.forestGreen,
             ),
           ),
           _SettingsTile(

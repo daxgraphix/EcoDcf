@@ -16,6 +16,7 @@ import 'package:ecodcf/features/onboarding/presentation/pages/permissions_onboar
 import 'package:ecodcf/features/report/presentation/pages/report_page.dart';
 import 'package:ecodcf/features/carbon/presentation/pages/carbon_history_page.dart';
 import 'package:ecodcf/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:ecodcf/features/device_usage/presentation/pages/device_usage_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorDashboard = GlobalKey<NavigatorState>(debugLabel: 'dashboard');
@@ -121,6 +122,11 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.activityHistory,
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const CarbonHistoryPage(),
+    ),
+    GoRoute(
+      path: AppRoutes.deviceUsage,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const DeviceUsagePage(),
     ),
   ],
 );

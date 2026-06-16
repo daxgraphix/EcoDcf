@@ -7,11 +7,11 @@ final academyProvider = NotifierProvider<AcademyNotifier, AcademyState>(
 );
 
 class AcademyNotifier extends Notifier<AcademyState> {
-  late final SustainabilityRepository _repository;
+  late final Future<SustainabilityRepository> _repositoryFuture;
 
   @override
   AcademyState build() {
-    _repository = ref.watch(sustainabilityRepositoryProvider);
+    _repositoryFuture = ref.watch(sustainabilityRepositoryAsyncProvider.future);
     return AcademyState(
       lessons: [],
       categories: [],
@@ -21,8 +21,9 @@ class AcademyNotifier extends Notifier<AcademyState> {
   }
 
   Future<void> _loadInitialData() async {
-    final categories = await _repository.getCategories();
-    final lessons = await _repository.getLessons();
+    final repository = await _repositoryFuture;
+    final categories = await repository.getCategories();
+    final lessons = await repository.getLessons();
     state = state.copyWith(
       categories: categories,
       lessons: lessons,
@@ -40,7 +41,8 @@ class AcademyNotifier extends Notifier<AcademyState> {
   }
 
   Future<void> markLessonCompleted(String lessonId) async {
-    await _repository.markLessonAsCompleted(lessonId);
+    final repository = await _repositoryFuture;
+    await repository.markLessonAsCompleted(lessonId);
     final updated = [...state.completedLessons, lessonId];
     state = state.copyWith(completedLessons: updated);
   }

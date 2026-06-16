@@ -15,4 +15,5 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String permissionsOnboarding = '/permissions-onboarding';
   static const String activityHistory = '/activity-history';
+  static const String deviceUsage = '/device-usage';
 }

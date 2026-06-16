@@ -17,6 +17,12 @@ class CarbonHistoryPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Carbon History'),
         centerTitle: true,
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
       ),
       body: recordsAsync.when(
         data: (records) {
@@ -80,7 +86,7 @@ class _HistoryCard extends ConsumerWidget {
             PopupMenuButton<String>(
               onSelected: (value) async {
                 if (value == 'edit') {
-                  _showEditDialog(context, ref);
+                  _showEditDialog(context, ref, record);
                 } else if (value == 'delete') {
                   final confirmed = await showDialog<bool>(
                     context: context,
@@ -113,7 +119,7 @@ class _HistoryCard extends ConsumerWidget {
     );
   }
 
-  void _showEditDialog(BuildContext context, WidgetRef ref) {
+  void _showEditDialog(BuildContext context, WidgetRef ref, CarbonRecord record) {
     final TextEditingController controller = TextEditingController(
       text: record.carbonValue.toStringAsFixed(3),
     );

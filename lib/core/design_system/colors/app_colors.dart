@@ -29,4 +29,9 @@ class AppColors {
   
   static const shimmerBase = Color(0xFFE0E0E0);
   static const shimmerHighlight = Color(0xFFBDBDBD);
+  
+  static const sageGreen = Color(0xFF81C784);
+  static const mintGreen = Color(0xFFAED581);
+  static const emeraldGreen = Color(0xFF66BB6A);
+  static const springGreen = Color(0xFF9CCC65);
 }

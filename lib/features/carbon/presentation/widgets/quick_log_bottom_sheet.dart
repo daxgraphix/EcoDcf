@@ -46,11 +46,11 @@ class QuickLogBottomSheet extends ConsumerWidget {
             crossAxisCount: 2,
             mainAxisSpacing: AppSpacing.md,
             crossAxisSpacing: AppSpacing.md,
-            childAspectRatio: 2.5,
+            childAspectRatio: 2.8,
             physics: const NeverScrollableScrollPhysics(),
             children: [
               _QuickLogItem(
-                label: '10 Searches',
+                label: '10 Searches\n0.23 kg CO₂',
                 icon: Icons.search,
                 color: Colors.blue,
                 onTap: () async {
@@ -58,7 +58,7 @@ class QuickLogBottomSheet extends ConsumerWidget {
                 },
               ),
               _QuickLogItem(
-                label: '5 Emails',
+                label: '5 Emails\n0.04 kg CO₂',
                 icon: Icons.email_outlined,
                 color: Colors.amber,
                 onTap: () async {
@@ -66,7 +66,7 @@ class QuickLogBottomSheet extends ConsumerWidget {
                 },
               ),
               _QuickLogItem(
-                label: '1h Streaming',
+                label: '1h Streaming\n0.19 kg CO₂',
                 icon: Icons.play_circle_outline,
                 color: Colors.red,
                 onTap: () async {
@@ -74,7 +74,7 @@ class QuickLogBottomSheet extends ConsumerWidget {
                 },
               ),
               _QuickLogItem(
-                label: '30m Social',
+                label: '30m Social\n0.07 kg CO₂',
                 icon: Icons.share_outlined,
                 color: Colors.purple,
                 onTap: () async {
@@ -82,7 +82,7 @@ class QuickLogBottomSheet extends ConsumerWidget {
                 },
               ),
               _QuickLogItem(
-                label: '1GB Cloud',
+                label: '1GB Cloud\n0.2 kg CO₂',
                 icon: Icons.cloud_outlined,
                 color: Colors.cyan,
                 onTap: () async {
@@ -90,11 +90,59 @@ class QuickLogBottomSheet extends ConsumerWidget {
                 },
               ),
               _QuickLogItem(
-                label: '1h Video Call',
+                label: '1h Video Call\n0.15 kg CO₂',
                 icon: Icons.videocam_outlined,
                 color: Colors.green,
                 onTap: () async {
                   await _log(ref, context, 'Video Call', 1);
+                },
+              ),
+              _QuickLogItem(
+                label: 'AI Image\n0.42 kg CO₂',
+                icon: Icons.image_outlined,
+                color: Colors.deepPurple,
+                onTap: () async {
+                  await _log(ref, context, 'AI Image Gen', 1);
+                },
+              ),
+              _QuickLogItem(
+                label: '1h Gaming\n0.24 kg CO₂',
+                icon: Icons.gamepad_outlined,
+                color: Colors.indigo,
+                onTap: () async {
+                  await _log(ref, context, 'Gaming', 1);
+                },
+              ),
+              _QuickLogItem(
+                label: 'AI Chat\n0.06 kg CO₂',
+                icon: Icons.chat_bubble_outlined,
+                color: Colors.teal,
+                onTap: () async {
+                  await _log(ref, context, 'AI Search', 1);
+                },
+              ),
+              _QuickLogItem(
+                label: '1h Music\n0.04 kg CO₂',
+                icon: Icons.music_note_outlined,
+                color: Colors.deepOrange,
+                onTap: () async {
+                  await _log(ref, context, 'Music Streaming', 1);
+                },
+              ),
+              _QuickLogItem(
+                label: 'Ecommerce\n0.29 kg CO₂',
+                icon: Icons.shopping_cart_outlined,
+                color: Colors.pink,
+                onTap: () async {
+                  await _log(ref, context, 'Ecommerce Order', 1);
+                },
+              ),
+              _QuickLogItem(
+                label: '1h Browsing\n0.08 kg CO₂',
+                icon: Icons.browser_updated_outlined,
+                color: Colors.blueGrey,
+                onTap: () async {
+                  await _log(ref, context, 'Web Browsing', 1);
                 },
               ),
             ],
@@ -116,6 +164,12 @@ class QuickLogBottomSheet extends ConsumerWidget {
       'Social Media' => CarbonCalculator.calculateSocialMedia(hours: value, posts: 0),
       'Video Streaming' => CarbonCalculator.calculateStreaming(hours: value, quality: 'HD'),
       'Video Call' => CarbonCalculator.calculateVideoCall(hours: value, quality: 'HD'),
+      'AI Image Gen' => CarbonCalculator.calculateAIUsage(promptCount: value.toInt(), isImageGeneration: true),
+      'Gaming' => CarbonCalculator.calculateGaming(hours: value, platform: 'console'),
+      'AI Search' => CarbonCalculator.calculateSearch(searchCount: value.toInt(), isAI: true),
+      'Music Streaming' => CarbonCalculator.calculateMusicStreaming(hours: value),
+      'Ecommerce Order' => CarbonCalculator.calculateEcommerce(orderCount: value.toInt()),
+      'Web Browsing' => CarbonCalculator.calculateDeviceEnergy(watts: 15, hours: value),
       _ => CarbonCalculator.calculateDeviceEnergy(watts: 10, hours: value),
     };
 

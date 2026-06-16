@@ -138,12 +138,12 @@ class _AnalyticsView extends ConsumerWidget {
 
   Color _getCategoryColor(String category) {
     switch (category) {
-      case 'Artificial Intelligence': return Colors.purple;
-      case 'E-Commerce': return Colors.orange;
-      case 'Cryptocurrency': return Colors.amber;
-      case 'Hardware': return Colors.blue;
-      case 'Entertainment': return Colors.red;
-      case 'Email': return Colors.lightBlue;
+      case 'Artificial Intelligence': return AppColors.forestGreen;
+      case 'E-Commerce': return AppColors.leafGreen;
+      case 'Cryptocurrency': return AppColors.sageGreen;
+      case 'Hardware': return AppColors.mintGreen;
+      case 'Entertainment': return AppColors.emeraldGreen;
+      case 'Email': return AppColors.springGreen;
       default: return AppColors.forestGreen;
     }
   }
