@@ -7,6 +7,7 @@ import 'package:ecodcf/core/providers/privacy_provider.dart';
 import 'package:ecodcf/core/services/permissions/privacy_transparency_service.dart';
 import 'package:ecodcf/core/design_system/spacing.dart';
 import 'package:ecodcf/core/design_system/radius.dart';
+import 'package:ecodcf/core/design_system/colors/app_colors.dart';
 
 class PrivacyCenterPage extends ConsumerWidget {
   const PrivacyCenterPage({super.key});
@@ -56,7 +57,7 @@ class PrivacyCenterPage extends ConsumerWidget {
               icon: Icons.delete_forever,
               title: 'Clear All Data',
               subtitle: 'Permanently remove all tracking history and preferences',
-              color: Colors.red,
+              color: AppColors.forestGreen,
               onTap: () => _confirmClearData(context, ref),
             ),
 
@@ -99,7 +100,7 @@ class PrivacyCenterPage extends ConsumerWidget {
                 );
               }
             },
-            child: const Text('Clear', style: TextStyle(color: Colors.red)),
+            child: const Text('Clear', style: TextStyle(color: AppColors.forestGreen)),
           ),
         ],
       ),

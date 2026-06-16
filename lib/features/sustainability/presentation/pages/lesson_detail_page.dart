@@ -86,6 +86,11 @@ class _LessonViewState extends State<_LessonView> {
         elevation: 0,
         foregroundColor: AppColors.forestGreen,
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.pop(context),
+        backgroundColor: AppColors.forestGreen,
+        child: const Icon(Icons.arrow_back, color: Colors.white),
+      ),
       body: Column(
         children: [
           // Progress Indicator
@@ -253,8 +258,8 @@ class _LessonViewState extends State<_LessonView> {
                 borderColor = AppColors.forestGreen;
                 bgColor = AppColors.forestGreen.withValues(alpha: 0.1);
               } else if (isSelected && index != quiz.correctAnswerIndex) {
-                borderColor = Colors.red;
-                bgColor = Colors.red.withValues(alpha: 0.1);
+                borderColor = AppColors.forestGreen;
+                bgColor = AppColors.forestGreen.withValues(alpha: 0.1);
               }
             } else if (isSelected) {
               borderColor = AppColors.forestGreen;
@@ -299,10 +304,10 @@ class _LessonViewState extends State<_LessonView> {
                       if (_quizSubmitted && index == quiz.correctAnswerIndex)
                         const Icon(Icons.check_circle,
                             color: AppColors.forestGreen)
-                      else if (_quizSubmitted &&
-                          isSelected &&
-                          index != quiz.correctAnswerIndex)
-                        const Icon(Icons.cancel, color: Colors.red)
+else if (_quizSubmitted &&
+          isSelected &&
+          index != quiz.correctAnswerIndex)
+        const Icon(Icons.cancel, color: AppColors.forestGreen)
                       else if (!_quizSubmitted)
                         Container(
                           width: 24,
@@ -342,14 +347,14 @@ class _LessonViewState extends State<_LessonView> {
               decoration: BoxDecoration(
                 color: _isCorrect
                     ? AppColors.forestGreen.withValues(alpha: 0.1)
-                    : Colors.red.withValues(alpha: 0.1),
+                    : AppColors.forestGreen.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
                   Icon(
                     _isCorrect ? Icons.stars : Icons.info_outline,
-                    color: _isCorrect ? AppColors.forestGreen : Colors.red,
+                    color: AppColors.forestGreen,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -357,10 +362,8 @@ class _LessonViewState extends State<_LessonView> {
                       _isCorrect
                           ? 'Excellent! You\'ve mastered this mission.'
                           : 'Not quite right, but you\'ve learned something new! Keep going.',
-                      style: TextStyle(
-                        color: _isCorrect
-                            ? AppColors.forestGreen
-                            : Colors.red[900],
+                      style: const TextStyle(
+                        color: AppColors.forestGreen,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

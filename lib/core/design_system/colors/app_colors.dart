@@ -7,7 +7,10 @@ class AppColors {
   static const offWhite = Color(0xFFF7F9F7);
   static const dark = Color(0xFF121212);
   
+  static const white = Color(0xFFFFFFFF);
+  static const black = Color(0xFF000000);
   static const light = Color(0xFFFFFFFF);
+  
   static const grey100 = Color(0xFFF5F5F5);
   static const grey200 = Color(0xFFEEEEEE);
   static const grey300 = Color(0xFFE0E0E0);
@@ -30,6 +33,7 @@ class AppColors {
   static const shimmerBase = Color(0xFFE0E0E0);
   static const shimmerHighlight = Color(0xFFBDBDBD);
   
+  // Additional green shades for variety
   static const sageGreen = Color(0xFF81C784);
   static const mintGreen = Color(0xFFAED581);
   static const emeraldGreen = Color(0xFF66BB6A);

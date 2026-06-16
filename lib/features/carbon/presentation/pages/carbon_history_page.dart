@@ -24,6 +24,13 @@ class CarbonHistoryPage extends ConsumerWidget {
               )
             : null,
       ),
+      floatingActionButton: Navigator.canPop(context)
+          ? FloatingActionButton(
+              onPressed: () => Navigator.pop(context),
+              backgroundColor: AppColors.forestGreen,
+              child: const Icon(Icons.arrow_back, color: Colors.white),
+            )
+          : null,
       body: recordsAsync.when(
         data: (records) {
           if (records.isEmpty) {
@@ -32,8 +39,9 @@ class CarbonHistoryPage extends ConsumerWidget {
           final sortedRecords = [...records]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
           
           return ListView.builder(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.md, bottom: AppSpacing.xl),
             itemCount: sortedRecords.length,
+            physics: const BouncingScrollPhysics(),
             itemBuilder: (context, index) {
               final record = sortedRecords[index];
               return _HistoryCard(record: record);
@@ -97,7 +105,7 @@ class _HistoryCard extends ConsumerWidget {
                         TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
                         TextButton(
                           onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                          child: const Text('Delete', style: TextStyle(color: AppColors.forestGreen)),
                         ),
                       ],
                     ),
@@ -110,7 +118,10 @@ class _HistoryCard extends ConsumerWidget {
               },
               itemBuilder: (context) => [
                 const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                const PopupMenuItem(value: 'delete', child: Text('Delete', style: TextStyle(color: Colors.red))),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Text('Delete', style: TextStyle(color: AppColors.forestGreen)),
+                ),
               ],
             ),
           ],

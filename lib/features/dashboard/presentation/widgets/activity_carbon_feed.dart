@@ -158,11 +158,11 @@ class _ActivityItem extends StatelessWidget {
 
   Color _getCategoryColor(String type) {
     switch (type.toLowerCase()) {
-      case 'email': return Colors.blue;
-      case 'search': return Colors.orange;
-      case 'ai_search': return Colors.purple;
-      case 'video_streaming': return Colors.red;
-      case 'social_media': return Colors.pink;
+      case 'email': return AppColors.forestGreen;
+      case 'search': return AppColors.leafGreen;
+      case 'ai_search': return AppColors.sageGreen;
+      case 'video_streaming': return AppColors.emeraldGreen;
+      case 'social_media': return AppColors.mintGreen;
       default: return AppColors.forestGreen;
     }
   }

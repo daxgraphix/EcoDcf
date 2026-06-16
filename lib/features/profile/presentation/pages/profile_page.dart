@@ -275,7 +275,7 @@ class _ProfileStatsCard extends StatelessWidget {
               label: 'Streak',
               value: '${stats.streakDays}d',
               icon: Icons.local_fire_department,
-              color: Colors.orange,
+              color: AppColors.forestGreen,
             ),
           ],
         ),

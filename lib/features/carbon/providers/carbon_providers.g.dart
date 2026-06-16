@@ -23,7 +23,7 @@ final carbonRepositoryProvider =
 
 typedef CarbonRepositoryRef = AutoDisposeFutureProviderRef<CarbonRepository>;
 String _$carbonRecordsStreamHash() =>
-    r'0706ccb98ed4a561e91e762f3a20f8648446e25e';
+    r'9e9382fa82fc16bac6f13ddcc3f26f4292a1a9ea';
 
 /// See also [carbonRecordsStream].
 @ProviderFor(carbonRecordsStream)

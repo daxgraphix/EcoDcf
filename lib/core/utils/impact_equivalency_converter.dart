@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ecodcf/core/design_system/colors/app_colors.dart';
 
 class ImpactEquivalency {
   final String label;
@@ -28,25 +29,25 @@ class ImpactEquivalency {
         label: 'Driving',
         value: '${(kgCO2 / co2PerKmCar).toStringAsFixed(1)} km',
         icon: Icons.directions_car,
-        color: Colors.blueAccent,
+        color: AppColors.forestGreen,
       ),
       ImpactEquivalency(
         label: 'Phone Charges',
         value: (kgCO2 / co2PerSmartphoneCharge).toStringAsFixed(0),
         icon: Icons.battery_charging_full,
-        color: Colors.orangeAccent,
+        color: AppColors.leafGreen,
       ),
       ImpactEquivalency(
         label: 'Bulb Hours',
         value: '${(kgCO2 / co2PerLedHour).toStringAsFixed(0)}h',
         icon: Icons.lightbulb,
-        color: Colors.yellow.shade700,
+        color: AppColors.mintGreen,
       ),
       ImpactEquivalency(
         label: 'Tree Days',
         value: (kgCO2 / co2AbsorbedByTreePerDay).toStringAsFixed(1),
         icon: Icons.park,
-        color: Colors.green,
+        color: AppColors.emeraldGreen,
       ),
     ];
   }

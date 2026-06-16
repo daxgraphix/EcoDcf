@@ -52,7 +52,7 @@ class QuickLogBottomSheet extends ConsumerWidget {
               _QuickLogItem(
                 label: '10 Searches\n0.23 kg CO₂',
                 icon: Icons.search,
-                color: Colors.blue,
+                color: AppColors.forestGreen,
                 onTap: () async {
                   await _log(ref, context, 'Search', 10);
                 },
@@ -60,7 +60,7 @@ class QuickLogBottomSheet extends ConsumerWidget {
               _QuickLogItem(
                 label: '5 Emails\n0.04 kg CO₂',
                 icon: Icons.email_outlined,
-                color: Colors.amber,
+                color: AppColors.leafGreen,
                 onTap: () async {
                   await _log(ref, context, 'Email', 5);
                 },
@@ -68,7 +68,7 @@ class QuickLogBottomSheet extends ConsumerWidget {
               _QuickLogItem(
                 label: '1h Streaming\n0.19 kg CO₂',
                 icon: Icons.play_circle_outline,
-                color: Colors.red,
+                color: AppColors.emeraldGreen,
                 onTap: () async {
                   await _log(ref, context, 'Video Streaming', 1);
                 },
@@ -76,7 +76,7 @@ class QuickLogBottomSheet extends ConsumerWidget {
               _QuickLogItem(
                 label: '30m Social\n0.07 kg CO₂',
                 icon: Icons.share_outlined,
-                color: Colors.purple,
+                color: AppColors.sageGreen,
                 onTap: () async {
                   await _log(ref, context, 'Social Media', 0.5);
                 },
@@ -84,7 +84,7 @@ class QuickLogBottomSheet extends ConsumerWidget {
               _QuickLogItem(
                 label: '1GB Cloud\n0.2 kg CO₂',
                 icon: Icons.cloud_outlined,
-                color: Colors.cyan,
+                color: AppColors.springGreen,
                 onTap: () async {
                   await _log(ref, context, 'Cloud Storage', 1);
                 },
@@ -92,7 +92,7 @@ class QuickLogBottomSheet extends ConsumerWidget {
               _QuickLogItem(
                 label: '1h Video Call\n0.15 kg CO₂',
                 icon: Icons.videocam_outlined,
-                color: Colors.green,
+                color: AppColors.leafGreen,
                 onTap: () async {
                   await _log(ref, context, 'Video Call', 1);
                 },
@@ -100,7 +100,7 @@ class QuickLogBottomSheet extends ConsumerWidget {
               _QuickLogItem(
                 label: 'AI Image\n0.42 kg CO₂',
                 icon: Icons.image_outlined,
-                color: Colors.deepPurple,
+                color: AppColors.mintGreen,
                 onTap: () async {
                   await _log(ref, context, 'AI Image Gen', 1);
                 },
@@ -108,7 +108,7 @@ class QuickLogBottomSheet extends ConsumerWidget {
               _QuickLogItem(
                 label: '1h Gaming\n0.24 kg CO₂',
                 icon: Icons.gamepad_outlined,
-                color: Colors.indigo,
+                color: AppColors.sageGreen,
                 onTap: () async {
                   await _log(ref, context, 'Gaming', 1);
                 },
@@ -116,7 +116,7 @@ class QuickLogBottomSheet extends ConsumerWidget {
               _QuickLogItem(
                 label: 'AI Chat\n0.06 kg CO₂',
                 icon: Icons.chat_bubble_outlined,
-                color: Colors.teal,
+                color: AppColors.springGreen,
                 onTap: () async {
                   await _log(ref, context, 'AI Search', 1);
                 },
@@ -124,7 +124,7 @@ class QuickLogBottomSheet extends ConsumerWidget {
               _QuickLogItem(
                 label: '1h Music\n0.04 kg CO₂',
                 icon: Icons.music_note_outlined,
-                color: Colors.deepOrange,
+                color: AppColors.mintGreen,
                 onTap: () async {
                   await _log(ref, context, 'Music Streaming', 1);
                 },
@@ -132,7 +132,7 @@ class QuickLogBottomSheet extends ConsumerWidget {
               _QuickLogItem(
                 label: 'Ecommerce\n0.29 kg CO₂',
                 icon: Icons.shopping_cart_outlined,
-                color: Colors.pink,
+                color: AppColors.leafGreen,
                 onTap: () async {
                   await _log(ref, context, 'Ecommerce Order', 1);
                 },
