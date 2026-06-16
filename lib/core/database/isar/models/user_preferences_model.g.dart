@@ -63,13 +63,18 @@ const UserPreferencesModelSchema = CollectionSchema(
       name: r'reduceMotionEnabled',
       type: IsarType.bool,
     ),
-    r'themeMode': PropertySchema(
+    r'remindersEnabled': PropertySchema(
       id: 9,
+      name: r'remindersEnabled',
+      type: IsarType.bool,
+    ),
+    r'themeMode': PropertySchema(
+      id: 10,
       name: r'themeMode',
       type: IsarType.string,
     ),
     r'userName': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'userName',
       type: IsarType.string,
     )
@@ -124,8 +129,9 @@ void _userPreferencesModelSerialize(
   writer.writeDateTime(offsets[6], object.lastSyncTimestamp);
   writer.writeBool(offsets[7], object.notificationsEnabled);
   writer.writeBool(offsets[8], object.reduceMotionEnabled);
-  writer.writeString(offsets[9], object.themeMode);
-  writer.writeString(offsets[10], object.userName);
+  writer.writeBool(offsets[9], object.remindersEnabled);
+  writer.writeString(offsets[10], object.themeMode);
+  writer.writeString(offsets[11], object.userName);
 }
 
 UserPreferencesModel _userPreferencesModelDeserialize(
@@ -145,8 +151,9 @@ UserPreferencesModel _userPreferencesModelDeserialize(
   object.lastSyncTimestamp = reader.readDateTimeOrNull(offsets[6]);
   object.notificationsEnabled = reader.readBool(offsets[7]);
   object.reduceMotionEnabled = reader.readBool(offsets[8]);
-  object.themeMode = reader.readStringOrNull(offsets[9]);
-  object.userName = reader.readStringOrNull(offsets[10]);
+  object.remindersEnabled = reader.readBool(offsets[9]);
+  object.themeMode = reader.readStringOrNull(offsets[10]);
+  object.userName = reader.readStringOrNull(offsets[11]);
   return object;
 }
 
@@ -176,8 +183,10 @@ P _userPreferencesModelDeserializeProp<P>(
     case 8:
       return (reader.readBool(offset)) as P;
     case 9:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 10:
+      return (reader.readStringOrNull(offset)) as P;
+    case 11:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -542,6 +551,16 @@ extension UserPreferencesModelQueryFilter on QueryBuilder<UserPreferencesModel,
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'reduceMotionEnabled',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel,
+      QAfterFilterCondition> remindersEnabledEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'remindersEnabled',
         value: value,
       ));
     });
@@ -995,6 +1014,20 @@ extension UserPreferencesModelQuerySortBy
   }
 
   QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByRemindersEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'remindersEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      sortByRemindersEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'remindersEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
       sortByThemeMode() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'themeMode', Sort.asc);
@@ -1166,6 +1199,20 @@ extension UserPreferencesModelQuerySortThenBy
   }
 
   QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByRemindersEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'remindersEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
+      thenByRemindersEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'remindersEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QAfterSortBy>
       thenByThemeMode() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'themeMode', Sort.asc);
@@ -1260,6 +1307,13 @@ extension UserPreferencesModelQueryWhereDistinct
   }
 
   QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct>
+      distinctByRemindersEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'remindersEnabled');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, UserPreferencesModel, QDistinct>
       distinctByThemeMode({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'themeMode', caseSensitive: caseSensitive);
@@ -1342,6 +1396,13 @@ extension UserPreferencesModelQueryProperty on QueryBuilder<
       reduceMotionEnabledProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'reduceMotionEnabled');
+    });
+  }
+
+  QueryBuilder<UserPreferencesModel, bool, QQueryOperations>
+      remindersEnabledProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'remindersEnabled');
     });
   }
 

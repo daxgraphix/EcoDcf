@@ -6,14 +6,14 @@ class SustainabilityMockData {
       ..._getFoundationsLessons(),
       ..._getDeviceCareLessons(),
       ..._getCloudComputingLessons(),
-      ..._getAIEthicsLessons(),
       ..._getStreamingMediaLessons(),
+      ..._getAIEthicsLessons(),
     ];
   }
 
   static List<Lesson> _getFoundationsLessons() {
     return [
-      Lesson(
+      const Lesson(
         id: 'found-1',
         title: 'Digital Carbon 101',
         description: 'The physical reality of the virtual world.',
@@ -30,7 +30,6 @@ class SustainabilityMockData {
           LessonSection(title: 'Briefing 6', content: 'Embodied carbon in manufacturing is significant.'),
           LessonSection(title: 'Briefing 7', content: 'E-waste contributes to 50 million tons annually.'),
           LessonSection(title: 'Briefing 8', content: 'Streaming accounts for 60% of internet traffic.'),
-          LessonSection(title: 'Briefing 9', content: 'AI training emits 284 tons CO2 per model.'),
           LessonSection(title: 'Briefing 10', content: '5G networks use 3x more energy than 4G.'),
           LessonSection(title: 'Learn 1', content: 'Emissions come from three main sources: Data Centers, Networks, and User Devices.'),
           LessonSection(title: 'Learn 2', content: 'Data centers alone consume ~200 TWh of energy per year.'),
@@ -43,7 +42,6 @@ class SustainabilityMockData {
           LessonSection(title: 'Learn 9', content: 'IoT devices constantly communicate with servers.'),
           LessonSection(title: 'Learn 10', content: 'Video streaming is the largest contributor to consumer data traffic.'),
           LessonSection(title: 'Learn 11', content: 'High-definition video requires significant bandwidth.'),
-          LessonSection(title: 'Learn 12', content: 'AI inference has growing energy demands.'),
           LessonSection(title: 'Learn 13', content: 'Manufacturing accounts for 80% of device carbon footprint.'),
           LessonSection(title: 'Learn 14', content: 'Transportation and packaging add to emissions.'),
           LessonSection(title: 'Learn 15', content: 'End-of-life disposal creates environmental harm.'),
@@ -83,10 +81,9 @@ class SustainabilityMockData {
           Quiz(id: 'found-q1-7', question: 'What is the main source of device carbon footprint?', options: [QuizOption(text: 'Using the device'), QuizOption(text: 'Manufacturing', isCorrect: true), QuizOption(text: 'Transportation'), QuizOption(text: 'Disposal')], correctAnswerIndex: 1),
           Quiz(id: 'found-q1-8', question: 'How much data does 4K streaming use per hour?', options: [QuizOption(text: '1GB'), QuizOption(text: '3GB'), QuizOption(text: '7GB', isCorrect: true), QuizOption(text: '15GB')], correctAnswerIndex: 2),
           Quiz(id: 'found-q1-9', question: 'What energy saving feature does OLED have?', options: [QuizOption(text: 'Faster processing'), QuizOption(text: 'Zero energy for black pixels', isCorrect: true), QuizOption(text: 'Longer battery life'), QuizOption(text: 'Smaller size')], correctAnswerIndex: 1),
-          Quiz(id: 'found-q1-10', question: 'What is the goal of Green AI?', options: [QuizOption(text: 'More powerful models'), QuizOption(text: 'Sustainable AI development', isCorrect: true), QuizOption(text: 'Faster training'), QuizOption(text: 'More parameters')], correctAnswerIndex: 1),
         ],
       ),
-      Lesson(
+      const Lesson(
         id: 'found-2',
         title: 'The Power of Dark Mode',
         description: 'Visual choices that save battery and planet.',
@@ -164,7 +161,7 @@ class SustainabilityMockData {
 
   static List<Lesson> _getDeviceCareLessons() {
     return [
-      Lesson(
+      const Lesson(
         id: 'device-1',
         title: 'Repair vs Replace',
         description: 'The most sustainable phone is the one you already own.',
@@ -242,7 +239,7 @@ class SustainabilityMockData {
 
   static List<Lesson> _getCloudComputingLessons() {
     return [
-      Lesson(
+      const Lesson(
         id: 'cloud-1',
         title: 'Green Cloud Storage',
         description: 'Choosing where your data lives.',
@@ -315,7 +312,7 @@ class SustainabilityMockData {
           Quiz(id: 'cloud-q1-10', question: 'What is the future of data centers?', options: [QuizOption(text: '100% renewables', isCorrect: true), QuizOption(text: 'More coal'), QuizOption(text: 'No change'), QuizOption(text: 'Less efficient')], correctAnswerIndex: 0),
         ],
       ),
-      Lesson(
+      const Lesson(
         id: 'cloud-2',
         title: 'Data Center Efficiency',
         description: 'Optimizing server operations for sustainability.',
@@ -393,7 +390,7 @@ class SustainabilityMockData {
 
   static List<Lesson> _getAIEthicsLessons() {
     return [
-      Lesson(
+      const Lesson(
         id: 'ai-1',
         title: 'AI & Sustainability',
         description: 'The environmental cost of intelligence.',
@@ -466,7 +463,7 @@ class SustainabilityMockData {
           Quiz(id: 'ai-q1-10', question: 'What is Green AI?', options: [QuizOption(text: 'AI that prints green'), QuizOption(text: 'Sustainable AI development', isCorrect: true), QuizOption(text: 'AI for gardening'), QuizOption(text: 'No environmental impact')], correctAnswerIndex: 1),
         ],
       ),
-      Lesson(
+      const Lesson(
         id: 'ai-2',
         title: 'AI Model Optimization',
         description: 'Making intelligent systems more efficient.',
@@ -544,7 +541,7 @@ class SustainabilityMockData {
 
   static List<Lesson> _getStreamingMediaLessons() {
     return [
-      Lesson(
+      const Lesson(
         id: 'media-1',
         title: 'Video Streaming Optimization',
         description: 'Lowering resolution to save the planet.',
@@ -617,7 +614,7 @@ class SustainabilityMockData {
           Quiz(id: 'media-q1-10', question: 'What is the environmental benefit of SD?', options: [QuizOption(text: 'More data'), QuizOption(text: 'Less energy', isCorrect: true), QuizOption(text: 'Better quality'), QuizOption(text: 'Faster loading')], correctAnswerIndex: 1),
         ],
       ),
-      Lesson(
+      const Lesson(
         id: 'media-2',
         title: 'Social Media Sustainability',
         description: 'Reducing the carbon footprint of social platforms.',

@@ -21,7 +21,7 @@ class BadgeGrid extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.grade, color: AppColors.forestGreen),
+              const Icon(Icons.grade, color: AppColors.forestGreen),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 'Your Badges',

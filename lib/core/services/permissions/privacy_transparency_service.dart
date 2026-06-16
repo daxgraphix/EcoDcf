@@ -56,11 +56,6 @@ class PrivacyTransparencyService {
           'Sync': 'Data stays on your device. Cloud sync is optional and encrypted.',
           'Privacy': 'We never track specific app names or content, only categories and time.',
         };
-      case 'ai_tracking':
-        return {
-          'Storage': 'Prompt counts are stored locally.',
-          'Privacy': 'The content of your AI prompts is NEVER recorded or transmitted.',
-        };
       default:
         return {'General': 'All digital activity data is processed offline-first.'};
     }

@@ -74,16 +74,6 @@ class GamificationMockData {
         xpReward: 250,
       ),
       Challenge(
-        id: 'c8',
-        title: 'AI Ethics Advocate',
-        description: 'Learn about AI environmental impact and complete an AI ethics lesson.',
-        icon: 'psychology',
-        type: ChallengeType.ai,
-        targetValue: 1,
-        currentProgress: 0,
-        xpReward: 350,
-      ),
-      Challenge(
         id: 'c9',
         title: 'Notification Ninja',
         description: 'Turn off non-essential notifications for 48 hours straight.',

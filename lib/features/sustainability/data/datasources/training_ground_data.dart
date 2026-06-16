@@ -4,7 +4,7 @@ class TrainingGroundData {
   static const String category = 'Training Ground';
 
   static List<Lesson> missions = [
-    Lesson(
+    const Lesson(
       id: 'tg-1',
       title: 'Mission 1: The Invisible Footprint',
       description:
@@ -79,7 +79,7 @@ class TrainingGroundData {
         Quiz(id: 'tg-q1-10', question: 'Which reduces digital carbon footprint?', options: [QuizOption(text: 'Streaming in highest quality'), QuizOption(text: 'Using digital services efficiently', isCorrect: true), QuizOption(text: 'Keeping many browser tabs open'), QuizOption(text: 'Downloading all media')], correctAnswerIndex: 1),
       ],
     ),
-    Lesson(
+    const Lesson(
       id: 'tg-2',
       title: 'Mission 2: The E-Waste Mountain',
       description:
@@ -154,7 +154,7 @@ class TrainingGroundData {
         Quiz(id: 'tg-q2-10', question: 'What should you do before disposing of a device?', options: [QuizOption(text: 'Sell it immediately'), QuizOption(text: 'Wipe all data', isCorrect: true), QuizOption(text: 'Throw it in trash'), QuizOption(text: 'Give to anyone')], correctAnswerIndex: 1),
       ],
     ),
-    Lesson(
+    const Lesson(
       id: 'tg-3',
       title: 'Mission 3: The AI Power Surge',
       description:
@@ -229,7 +229,7 @@ class TrainingGroundData {
         Quiz(id: 'tg-q3-10', question: 'What is Green AI?', options: [QuizOption(text: 'AI that prints green'), QuizOption(text: 'Sustainable AI development', isCorrect: true), QuizOption(text: 'AI for gardening'), QuizOption(text: 'No environmental impact')], correctAnswerIndex: 1),
       ],
     ),
-    Lesson(
+    const Lesson(
       id: 'tg-4',
       title: 'Mission 4: Digital Wellness & Mental Health',
       description:
@@ -501,7 +501,7 @@ class TrainingGroundData {
             correctAnswerIndex: 1),
       ],
     ),
-    Lesson(
+    const Lesson(
       id: 'tg-5',
       title: 'Mission 5: Smart Home Energy Optimization',
       description:
@@ -770,7 +770,7 @@ class TrainingGroundData {
             correctAnswerIndex: 2),
       ],
     ),
-    Lesson(
+    const Lesson(
       id: 'tg-6',
       title: 'Mission 6: Sustainable Gaming & Entertainment',
       description:
@@ -1041,7 +1041,7 @@ class TrainingGroundData {
             correctAnswerIndex: 2),
       ],
     ),
-    Lesson(
+    const Lesson(
       id: 'tg-7',
       title: 'Mission 7: Digital Privacy & Security',
       description:
@@ -1283,7 +1283,7 @@ class TrainingGroundData {
             correctAnswerIndex: 2),
       ],
     ),
-    Lesson(
+    const Lesson(
       id: 'tg-8',
       title: 'Mission 8: Sustainable Cloud Computing',
       description:
@@ -1546,7 +1546,7 @@ class TrainingGroundData {
             correctAnswerIndex: 1),
       ],
     ),
-    Lesson(
+    const Lesson(
       id: 'tg-9',
       title: 'Mission 9: Digital Minimalism',
       description:
@@ -1808,7 +1808,7 @@ class TrainingGroundData {
             correctAnswerIndex: 2),
       ],
     ),
-    Lesson(
+    const Lesson(
       id: 'tg-10',
       title: 'Mission 10: The Green Coder',
       description:
@@ -1883,7 +1883,7 @@ class TrainingGroundData {
         Quiz(id: 'tg-q10-10', question: 'What is the goal of sustainable architecture?', options: [QuizOption(text: 'Short-term gains only'), QuizOption(text: 'Consider full lifecycle impact', isCorrect: true), QuizOption(text: 'More complex systems'), QuizOption(text: 'Higher resource usage')], correctAnswerIndex: 1),
       ],
     ),
-    Lesson(
+    const Lesson(
       id: 'tg-11',
       title: 'Mission 11: The Gaming Grid',
       description: 'Explore the energy trade-offs between local gaming and cloud-based streaming.',
@@ -1956,7 +1956,7 @@ class TrainingGroundData {
         Quiz(id: 'tg-q11-10', question: 'How can game subscriptions reduce energy use?', options: [QuizOption(text: 'Reduce downloads'), QuizOption(text: 'Share accounts'), QuizOption(text: 'Reduce physical production', isCorrect: true), QuizOption(text: 'Lower graphics quality')], correctAnswerIndex: 2),
       ],
     ),
-    Lesson(
+    const Lesson(
       id: 'tg-12',
       title: 'Mission 12: The Chain Reaction',
       description:
@@ -2030,7 +2030,7 @@ class TrainingGroundData {
         Quiz(id: 'tg-q12-10', question: 'Which blockchain is most energy efficient?', options: [QuizOption(text: 'Bitcoin'), QuizOption(text: 'Ethereum (post-merge)', isCorrect: true), QuizOption(text: 'Ethereum (pre-merge)'), QuizOption(text: 'Litecoin')], correctAnswerIndex: 1),
       ],
     ),
-    Lesson(
+    const Lesson(
       id: 'tg-13',
       title: 'Mission 13: Powering the Future',
       description:
@@ -2105,7 +2105,7 @@ class TrainingGroundData {
         Quiz(id: 'tg-q13-10', question: 'What is the future of internet energy?', options: [QuizOption(text: '100% fossil fuels'), QuizOption(text: '100% renewables', isCorrect: true), QuizOption(text: 'Nuclear only'), QuizOption(text: 'No change')], correctAnswerIndex: 1),
       ],
     ),
-    Lesson(
+    const Lesson(
       id: 'tg-14',
       title: 'Mission 14: Access for All',
       description:
@@ -2179,7 +2179,7 @@ class TrainingGroundData {
         Quiz(id: 'tg-q14-10', question: 'What is the benefit of offline functionality?', options: [QuizOption(text: 'Reduces network energy', isCorrect: true), QuizOption(text: 'Requires constant internet'), QuizOption(text: 'Uses more processing'), QuizOption(text: 'Increases latency')], correctAnswerIndex: 0),
       ],
     ),
-    Lesson(
+    const Lesson(
       id: 'tg-15',
       title: 'Mission 15: Digital Shield',
       description:

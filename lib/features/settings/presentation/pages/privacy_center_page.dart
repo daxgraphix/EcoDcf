@@ -1,3 +1,6 @@
+import 'package:ecodcf/core/providers/database/isar_provider.dart';
+import 'package:ecodcf/core/database/isar/services/isar_data_service.dart';
+import 'package:printing/printing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ecodcf/core/providers/privacy_provider.dart';
@@ -33,30 +36,115 @@ class PrivacyCenterPage extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.xl),
             
-            Text(
-              'Required Permissions',
-              style: theme.textTheme.titleLarge,
+            const _SectionHeader(title: 'Data Management'),
+            const SizedBox(height: AppSpacing.md),
+            _ActionTile(
+              icon: Icons.download,
+              title: 'Export My Data',
+              subtitle: 'Download a copy of your tracked activities (.isar)',
+              onTap: () async {
+                final isar = await ref.read(isarProvider.future);
+                final service = IsarDataService(isar);
+                final file = await service.exportData();
+                await Printing.sharePdf(
+                  bytes: await file.readAsBytes(), 
+                  filename: 'EcoDcf_Export.isar'
+                );
+              },
             ),
+            _ActionTile(
+              icon: Icons.delete_forever,
+              title: 'Clear All Data',
+              subtitle: 'Permanently remove all tracking history and preferences',
+              color: Colors.red,
+              onTap: () => _confirmClearData(context, ref),
+            ),
+
+            const SizedBox(height: AppSpacing.xl),
+            const _SectionHeader(title: 'Required Permissions'),
             const SizedBox(height: AppSpacing.md),
             ...privacyService.requirements.map((req) => _PermissionCard(requirement: req)),
             
             const SizedBox(height: AppSpacing.xl),
-            Text(
-              'Module Transparency',
-              style: theme.textTheme.titleLarge,
-            ),
+            const _SectionHeader(title: 'Module Transparency'),
             const SizedBox(height: AppSpacing.md),
             _TransparencyTile(
               title: 'Carbon Tracking',
               report: privacyService.getModuleTransparency('carbon_tracking'),
             ),
-            const SizedBox(height: AppSpacing.md),
-            _TransparencyTile(
-              title: 'AI Usage Tracking',
-              report: privacyService.getModuleTransparency('ai_tracking'),
-            ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _confirmClearData(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear All Data?'),
+        content: const Text(
+          'This action cannot be undone. All your carbon history and preferences will be permanently deleted.'
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+              final isar = await ref.read(isarProvider.future);
+              await IsarDataService(isar).clearAllData();
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('All data has been cleared.')),
+                );
+              }
+            },
+            child: const Text('Clear', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  const _SectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+    );
+  }
+}
+
+class _ActionTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final Color? color;
+
+  const _ActionTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: ListTile(
+        leading: Icon(icon, color: color ?? theme.colorScheme.primary),
+        title: Text(title, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+        onTap: onTap,
       ),
     );
   }

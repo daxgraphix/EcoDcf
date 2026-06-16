@@ -62,10 +62,11 @@ class UserPreferencesRepository {
     });
   }
 
-  Future<void> updateNotifications(bool enabled) async {
+  Future<void> updateNotifications(bool enabled, {bool? reminders}) async {
     final prefs = await getPreferences();
     await _isar.writeTxn(() async {
       prefs.notificationsEnabled = enabled;
+      if (reminders != null) prefs.remindersEnabled = reminders;
       await _isar.userPreferencesModels.put(prefs);
     });
   }

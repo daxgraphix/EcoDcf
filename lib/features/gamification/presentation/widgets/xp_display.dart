@@ -124,7 +124,6 @@ class BadgeGrid extends ConsumerWidget {
       GamificationBadge(id: 'digital_minimalist', title: 'Digital Minimalist', description: '', icon: '', xpRequired: 1000),
       GamificationBadge(id: 'green_streamer', title: 'Green Streamer', description: '', icon: '', xpRequired: 750),
       GamificationBadge(id: 'cloud_optimizer', title: 'Cloud Optimizer', description: '', icon: '', xpRequired: 1500),
-      GamificationBadge(id: 'ai_efficient', title: 'AI Efficient', description: '', icon: '', xpRequired: 2000),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,7 +152,6 @@ List<GamificationBadge> _unlockedBadges(int totalXP) {
     GamificationBadge(id: 'digital_minimalist', title: 'Digital Minimalist', description: '', icon: '', xpRequired: 1000),
     GamificationBadge(id: 'green_streamer', title: 'Green Streamer', description: '', icon: '', xpRequired: 750),
     GamificationBadge(id: 'cloud_optimizer', title: 'Cloud Optimizer', description: '', icon: '', xpRequired: 1500),
-    GamificationBadge(id: 'ai_efficient', title: 'AI Efficient', description: '', icon: '', xpRequired: 2000),
   ].where((badge) => totalXP >= badge.xpRequired).toList(growable: false);
 }
 

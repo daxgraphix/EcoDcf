@@ -70,7 +70,6 @@ enum ChallengeType {
   email,
   streaming,
   cloud,
-  ai,
   device,
   search,
   social,

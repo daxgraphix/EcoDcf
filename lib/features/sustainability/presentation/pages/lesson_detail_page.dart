@@ -168,7 +168,7 @@ class _LessonViewState extends State<_LessonView> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.forestGreen.withOpacity(0.1),
+              color: AppColors.forestGreen.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -251,14 +251,14 @@ class _LessonViewState extends State<_LessonView> {
             if (_quizSubmitted) {
               if (index == quiz.correctAnswerIndex) {
                 borderColor = AppColors.forestGreen;
-                bgColor = AppColors.forestGreen.withOpacity(0.1);
+                bgColor = AppColors.forestGreen.withValues(alpha: 0.1);
               } else if (isSelected && index != quiz.correctAnswerIndex) {
                 borderColor = Colors.red;
-                bgColor = Colors.red.withOpacity(0.1);
+                bgColor = Colors.red.withValues(alpha: 0.1);
               }
             } else if (isSelected) {
               borderColor = AppColors.forestGreen;
-              bgColor = AppColors.forestGreen.withOpacity(0.05);
+              bgColor = AppColors.forestGreen.withValues(alpha: 0.05);
             }
 
             return Padding(
@@ -321,7 +321,7 @@ class _LessonViewState extends State<_LessonView> {
                                   child: Container(
                                     width: 12,
                                     height: 12,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       shape: BoxShape.circle,
                                       color: AppColors.forestGreen,
                                     ),
@@ -341,8 +341,8 @@ class _LessonViewState extends State<_LessonView> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: _isCorrect
-                    ? AppColors.forestGreen.withOpacity(0.1)
-                    : Colors.red.withOpacity(0.1),
+                    ? AppColors.forestGreen.withValues(alpha: 0.1)
+                    : Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(

@@ -57,8 +57,8 @@ class UserPreferences extends _$UserPreferences {
     ref.invalidateSelf();
   }
 
-  Future<void> updateNotifications(bool enabled) async {
-    await _repository.updateNotifications(enabled);
+  Future<void> updateNotifications(bool enabled, {bool? reminders}) async {
+    await _repository.updateNotifications(enabled, reminders: reminders);
     ref.invalidateSelf();
   }
 

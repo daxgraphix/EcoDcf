@@ -36,7 +36,6 @@ class CalculateDScoreUseCaseImpl implements CalculateDScoreUseCase {
     total -= (input.streamingCarbon * 2).clamp(0.0, 25.0);
     total -= (input.emailCarbon * 10).clamp(0.0, 10.0);
     total -= (input.cloudCarbon / 10.0).clamp(0.0, 15.0);
-    total -= (input.aiCarbon * 5).clamp(0.0, 20.0);
     total -= (input.socialCarbon * 2).clamp(0.0, 15.0);
 
     return total.clamp(0.0, 100.0);
@@ -65,9 +64,6 @@ class CalculateDScoreUseCaseImpl implements CalculateDScoreUseCase {
     if (input.cloudCarbon > 10.0) {
       recommendations['focusAreas'].add('Cloud Storage Optimization');
     }
-    if (input.aiCarbon > 1.0) {
-      recommendations['focusAreas'].add('AI Usage Awareness');
-    }
 
     return recommendations;
   }
@@ -79,8 +75,8 @@ class DScoreInput {
   final double streamingCarbon;
   final double emailCarbon;
   final double cloudCarbon;
-  final double aiCarbon;
   final double socialCarbon;
+  final double aiCarbon;
   final double todayCarbon;
   final double weeklyCarbon;
   final double monthlyCarbon;
@@ -91,8 +87,8 @@ class DScoreInput {
     this.streamingCarbon = 0.0,
     this.emailCarbon = 0.0,
     this.cloudCarbon = 0.0,
-    this.aiCarbon = 0.0,
     this.socialCarbon = 0.0,
+    this.aiCarbon = 0.0,
     this.todayCarbon = 0.0,
     this.weeklyCarbon = 0.0,
     this.monthlyCarbon = 0.0,
@@ -105,8 +101,8 @@ class DScoreInput {
       'streamingCarbon': streamingCarbon,
       'emailCarbon': emailCarbon,
       'cloudCarbon': cloudCarbon,
-      'aiCarbon': aiCarbon,
       'socialCarbon': socialCarbon,
+      'aiCarbon': aiCarbon,
     };
   }
 }

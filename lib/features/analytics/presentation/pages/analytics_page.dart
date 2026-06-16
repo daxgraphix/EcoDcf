@@ -7,6 +7,7 @@ import 'package:ecodcf/features/analytics/providers/analytics_providers.dart';
 import 'package:ecodcf/features/analytics/domain/entities/analytics_data.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:ecodcf/core/services/pdf_report_service.dart';
+import 'package:intl/intl.dart';
 
 class AnalyticsPage extends ConsumerWidget {
   const AnalyticsPage({super.key});
@@ -16,13 +17,14 @@ class AnalyticsPage extends ConsumerWidget {
     return DefaultTabController(
       length: 4,
       child: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: AppColors.offWhite,
         appBar: AppBar(
-          title: const Text('Analytics'),
+          title: const Text('Insights'),
+          centerTitle: true,
           actions: [
             Builder(
               builder: (context) => IconButton(
-                icon: const Icon(Icons.picture_as_pdf),
+                icon: const Icon(Icons.share_outlined),
                 onPressed: () async {
                   final index = DefaultTabController.of(context).index;
                   final provider = [
@@ -46,6 +48,11 @@ class AnalyticsPage extends ConsumerWidget {
             ),
           ],
           bottom: const TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.center,
+            indicatorSize: TabBarIndicatorSize.label,
+            labelStyle: TextStyle(fontWeight: FontWeight.bold),
+            unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal),
             tabs: [
               Tab(text: 'Daily'),
               Tab(text: 'Weekly'),
@@ -78,7 +85,7 @@ class _AnalyticsView extends ConsumerWidget {
 
     if (asyncData.hasError && !asyncData.isLoading) {
       return ErrorView(
-        message: 'Failed to load analytics. Please try again.',
+        message: 'Failed to load analytics.',
         onRetry: () => ref.invalidate(provider),
       );
     }
@@ -87,7 +94,7 @@ class _AnalyticsView extends ConsumerWidget {
     final data = asyncData.value ?? _getPlaceholderData();
 
     if (data.isEmpty && !isLoading) {
-      return const Center(child: Text('No data recorded yet.'));
+      return const Center(child: Text('Start tracking to see insights!'));
     }
 
     final totalCarbon = data.fold(0.0, (sum, item) => sum + item.carbonValue);
@@ -95,27 +102,20 @@ class _AnalyticsView extends ConsumerWidget {
 
     return Skeletonizer(
       enabled: isLoading,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildSummaryCard(totalCarbon, data.length),
-          const SizedBox(height: 24),
-          _buildChart(data),
-          const SizedBox(height: 24),
-          const Text(
-            'Category Breakdown',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          _buildCategoryBreakdown(categoryData),
-          const SizedBox(height: 24),
-          const Text(
-            'History',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          ...data.reversed.map((item) => _buildHistoryItem(item)),
-        ],
+      child: RefreshIndicator(
+        onRefresh: () async => ref.invalidate(provider),
+        child: ListView(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          children: [
+            _buildSummaryCard(totalCarbon, data.length),
+            const SizedBox(height: AppSpacing.lg),
+            _buildChartCard(data),
+            const SizedBox(height: AppSpacing.lg),
+            _buildCategorySection(categoryData),
+            const SizedBox(height: AppSpacing.lg),
+            _buildHistorySection(data),
+          ],
+        ),
       ),
     );
   }
@@ -123,164 +123,252 @@ class _AnalyticsView extends ConsumerWidget {
   Map<String, double> _getCategoryData(List<AnalyticsData> data) {
     final Map<String, double> categories = {};
     for (var item in data) {
-      categories[item.category] = (categories[item.category] ?? 0) + item.carbonValue;
+      String category = item.category.replaceAll('_', ' ');
+      // Normalize specific high-level categories
+      if (category.toLowerCase().contains('ai')) category = 'Artificial Intelligence';
+      if (category.toLowerCase().contains('ecommerce')) category = 'E-Commerce';
+      if (category.toLowerCase().contains('crypto')) category = 'Cryptocurrency';
+      if (category.toLowerCase().contains('device')) category = 'Hardware';
+      if (category.toLowerCase().contains('streaming')) category = 'Entertainment';
+      
+      categories[category] = (categories[category] ?? 0) + item.carbonValue;
     }
     return categories;
   }
 
-  Widget _buildCategoryBreakdown(Map<String, double> categoryData) {
-    return Column(
-      children: categoryData.entries.map((entry) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: Text(entry.key, style: const TextStyle(fontSize: 14)),
-              ),
-              Expanded(
-                flex: 7,
-                child: LinearProgressIndicator(
-                  value: entry.value / categoryData.values.fold(0.0, (a, b) => a + b),
-                  backgroundColor: Colors.grey[200],
-                  color: AppColors.forestGreen,
-                  minHeight: 8,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                '${entry.value.toStringAsFixed(1)} kg',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  List<AnalyticsData> _getPlaceholderData() {
-    return List.generate(
-      5,
-      (index) => AnalyticsData(
-        date: DateTime.now().subtract(Duration(days: index)),
-        carbonValue: 1.5,
-        category: 'Placeholder',
-      ),
-    );
+  Color _getCategoryColor(String category) {
+    switch (category) {
+      case 'Artificial Intelligence': return Colors.purple;
+      case 'E-Commerce': return Colors.orange;
+      case 'Cryptocurrency': return Colors.amber;
+      case 'Hardware': return Colors.blue;
+      case 'Entertainment': return Colors.red;
+      case 'Email': return Colors.lightBlue;
+      default: return AppColors.forestGreen;
+    }
   }
 
   Widget _buildSummaryCard(double total, int count) {
     return Card(
+      elevation: 0,
+      color: AppColors.forestGreen,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            const Text('Total Footprint', style: TextStyle(fontSize: 16)),
+            const Text(
+              'Total Footprint',
+              style: TextStyle(color: Colors.white70, fontSize: 16),
+            ),
             const SizedBox(height: 8),
             Text(
-              '${total.toStringAsFixed(2)} kg CO2e',
+              '${total.toStringAsFixed(2)} kg CO₂e',
               style: const TextStyle(
-                fontSize: 28,
+                fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: AppColors.forestGreen,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 4),
-            Text('Aggregated over $count periods', style: const TextStyle(color: Colors.grey)),
+            Text(
+              'Across $count tracked activities',
+              style: const TextStyle(color: Colors.white54, fontSize: 12),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildChart(List<AnalyticsData> data) {
-    // Performance: Downsample data if there are too many points for smooth rendering
-    final List<AnalyticsData> displayData;
-    if (data.length > 50) {
-      final step = (data.length / 50).ceil();
-      displayData = [];
-      for (var i = 0; i < data.length; i += step) {
-        displayData.add(data[i]);
-      }
-    } else {
-      displayData = data;
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Responsiveness: Adjust height and styling based on available width
-        final isNarrow = constraints.maxWidth < 400;
-        final chartHeight = isNarrow ? 180.0 : 220.0;
-
-        return SizedBox(
-          height: chartHeight,
-          child: LineChart(
-            LineChartData(
-              gridData: const FlGridData(show: false),
-              titlesData: FlTitlesData(
-                show: true,
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: !isNarrow,
-                    reservedSize: 22,
-                    getTitlesWidget: (value, meta) {
-                      if (value.toInt() % (displayData.length / 5).ceil() != 0) {
-                        return const SizedBox.shrink();
-                      }
-                      final index = value.toInt();
-                      if (index < 0 || index >= displayData.length) return const SizedBox.shrink();
-                      return Text(
-                        '${displayData[index].date.month}/${displayData[index].date.day}',
-                        style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-                      );
-                    },
-                  ),
-                ),
-                leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              ),
-              borderData: FlBorderData(show: false),
-              lineBarsData: [
-                LineChartBarData(
-                  spots: displayData.asMap().entries.map((e) {
-                    return FlSpot(e.key.toDouble(), e.value.carbonValue);
-                  }).toList(),
-                  isCurved: true,
-                  color: AppColors.forestGreen,
-                  barWidth: isNarrow ? 3 : 4,
-                  dotData: const FlDotData(show: false),
-                  belowBarData: BarAreaData(
-                    show: true,
+  Widget _buildChartCard(List<AnalyticsData> data) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Trend Analysis', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
                     color: AppColors.forestGreen.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
+                  child: const Text('CO₂e kg', style: TextStyle(fontSize: 10, color: AppColors.forestGreen, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildHistoryItem(AnalyticsData item) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        title: Text('${item.date.year}-${item.date.month}-${item.date.day}'),
-        subtitle: Text(item.category),
-        trailing: Text(
-          '${item.carbonValue.toStringAsFixed(2)} kg CO2e',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: AppColors.forestGreen,
-          ),
+            const SizedBox(height: 24),
+            SizedBox(height: 200, child: _buildChart(data)),
+          ],
         ),
       ),
     );
   }
-}
 
+  Widget _buildCategorySection(Map<String, double> categoryData) {
+    final total = categoryData.values.fold(0.0, (a, b) => a + b);
+    final sortedEntries = categoryData.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 4, bottom: 12),
+          child: Text('Impact Distribution', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        ),
+        Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: sortedEntries.map((entry) {
+                final percentage = total > 0 ? entry.value / total : 0.0;
+                final color = _getCategoryColor(entry.key);
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(entry.key, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.grey700)),
+                            ],
+                          ),
+                          Text('${entry.value.toStringAsFixed(2)} kg (${(percentage * 100).toStringAsFixed(1)}%)', 
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: percentage,
+                          backgroundColor: color.withValues(alpha: 0.1),
+                          color: color,
+                          minHeight: 6,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHistorySection(List<AnalyticsData> data) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 4, bottom: 12),
+          child: Text('Recent History', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        ),
+        ...data.reversed.take(10).map((item) => Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+          color: Colors.white,
+          child: ListTile(
+            leading: const CircleAvatar(
+              backgroundColor: AppColors.offWhite,
+              child: Icon(Icons.history, color: AppColors.forestGreen, size: 20),
+            ),
+            title: Text(DateFormat('MMM dd, yyyy').format(item.date), style: const TextStyle(fontWeight: FontWeight.w500)),
+            subtitle: Text(item.category.replaceAll('_', ' ')),
+            trailing: Text(
+              '${item.carbonValue.toStringAsFixed(2)} kg',
+              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.forestGreen),
+            ),
+          ),
+        )),
+      ],
+    );
+  }
+
+  List<AnalyticsData> _getPlaceholderData() {
+    return List.generate(
+      7,
+      (index) => AnalyticsData(
+        date: DateTime.now().subtract(Duration(days: index)),
+        carbonValue: 0.5 + index * 0.2,
+        category: 'Sample',
+      ),
+    );
+  }
+
+  Widget _buildChart(List<AnalyticsData> data) {
+    if (data.isEmpty) return const SizedBox.shrink();
+
+    return LineChart(
+      LineChartData(
+        gridData: const FlGridData(show: false),
+        titlesData: FlTitlesData(
+          show: true,
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                final index = value.toInt();
+                if (index < 0 || index >= data.length || index % (data.length / 3).ceil() != 0) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    DateFormat('MM/dd').format(data[index].date),
+                    style: TextStyle(fontSize: 10, color: Colors.grey[400]),
+                  ),
+                );
+              },
+            ),
+          ),
+          leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
+        borderData: FlBorderData(show: false),
+        lineBarsData: [
+          LineChartBarData(
+            spots: data.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value.carbonValue)).toList(),
+            isCurved: true,
+            color: AppColors.forestGreen,
+            barWidth: 3,
+            dotData: const FlDotData(show: false),
+            belowBarData: BarAreaData(
+              show: true,
+              gradient: LinearGradient(
+                colors: [AppColors.forestGreen.withValues(alpha: 0.2), AppColors.forestGreen.withValues(alpha: 0.0)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

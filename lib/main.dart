@@ -4,6 +4,7 @@ import 'package:ecodcf/core/routes/app_router.dart';
 import 'package:ecodcf/core/theme/app_theme.dart';
 import 'package:ecodcf/core/providers/preferences_provider.dart';
 import 'package:ecodcf/core/providers/initialization_provider.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,39 +34,45 @@ class EcoDcfApp extends ConsumerWidget {
       data: (prefs) {
         final themeMode = prefs.themeMode == 'dark' ? ThemeMode.dark : ThemeMode.light;
         
-        return MaterialApp.router(
-          title: 'EcoDcf',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.light,
-          darkTheme: AppTheme.dark,
-          themeMode: themeMode,
-          routerConfig: appRouter,
-          builder: (context, child) {
-            return MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaler: TextScaler.linear(prefs.fontSizeScale),
-                accessibleNavigation: prefs.highContrastEnabled,
-              ),
-              child: initialization.when(
-                data: (_) => child!,
-                loading: () => const Scaffold(
-                  body: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 16),
-                        Text('Getting your personal eco-dashboard ready...'),
-                      ],
+        return DynamicColorBuilder(
+          builder: (lightDynamic, darkDynamic) {
+            return MaterialApp.router(
+              title: 'EcoDcf',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.lightTheme(lightDynamic),
+              darkTheme: AppTheme.darkTheme(darkDynamic),
+              themeMode: themeMode,
+              routerConfig: appRouter,
+              builder: (context, child) {
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: TextScaler.linear(prefs.fontSizeScale),
+                    accessibleNavigation: prefs.highContrastEnabled,
+                    disableAnimations: prefs.reduceMotionEnabled,
+                    highContrast: prefs.highContrastEnabled,
+                  ),
+                  child: initialization.when(
+                    data: (_) => child!,
+                    loading: () => const Scaffold(
+                      body: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 16),
+                            Text('Getting your personal eco-dashboard ready...'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    error: (err, stack) => Scaffold(
+                      body: Center(
+                        child: Text('Initialization Error: $err'),
+                      ),
                     ),
                   ),
-                ),
-                error: (err, stack) => Scaffold(
-                  body: Center(
-                    child: Text('Initialization Error: $err'),
-                  ),
-                ),
-              ),
+                );
+              },
             );
           },
         );

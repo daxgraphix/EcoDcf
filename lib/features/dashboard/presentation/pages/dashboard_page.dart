@@ -1,15 +1,23 @@
+import 'dart:async';
+import 'package:ecodcf/features/carbon/presentation/pages/carbon_history_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ecodcf/core/design_system/app_design_system.dart';
+import 'package:ecodcf/core/design_system/components/glass_card.dart';
 import 'package:ecodcf/core/presentation/widgets/error_view.dart';
-import 'package:ecodcf/core/presentation/widgets/shimmer_loading.dart';
 import 'package:ecodcf/features/dashboard/presentation/bloc/dashboard_notifier.dart';
+import 'package:ecodcf/features/dashboard/presentation/widgets/modern_score_gauge.dart';
 import 'package:ecodcf/core/utils/carbon_calculator.dart';
 import 'package:ecodcf/core/utils/impact_equivalency_converter.dart';
 import 'package:ecodcf/features/carbon/providers/carbon_providers.dart';
 import 'package:ecodcf/features/carbon/domain/entities/carbon_record.dart';
 import 'package:ecodcf/features/dashboard/domain/entities/dashboard_stats.dart';
+import 'package:ecodcf/features/carbon/presentation/widgets/quick_log_bottom_sheet.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:animations/animations.dart';
+import 'package:ecodcf/core/providers/preferences_provider.dart';
+import 'package:ecodcf/features/dashboard/presentation/widgets/activity_carbon_feed.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -32,33 +40,251 @@ class DashboardPage extends ConsumerWidget {
 
   Widget _buildScaffold(BuildContext context, WidgetRef ref, DashboardStats stats) {
     return Scaffold(
-      backgroundColor: AppColors.offWhite,
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () => ref.read(dashboardProvider.notifier).refresh(),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const _HeaderWidget(),
-                const SizedBox(height: AppSpacing.xl),
-                _DScoreRingWidget(score: stats.dscore),
-                const SizedBox(height: AppSpacing.xl),
-                _ImpactEquivalencyList(carbon: stats.todayCarbon),
-                const SizedBox(height: AppSpacing.xl),
-                _AnalyticsSummaryWidget(stats: stats),
-                const SizedBox(height: AppSpacing.xl),
-                _DeviceUsageWidget(hours: stats.todayUsageHours),
-                const SizedBox(height: AppSpacing.xl),
-                const _ManualFootprintSection(),
-                const SizedBox(height: AppSpacing.xl),
-              ],
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) => const QuickLogBottomSheet(),
+          );
+        },
+        backgroundColor: AppColors.forestGreen,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text('Quick Log', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ),
+      body: Stack(
+        children: [
+          // Background Mesh Gradient Effect
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFE8F5E9),
+                  AppColors.offWhite,
+                  Color(0xFFE3F2FD),
+                ],
+              ),
             ),
           ),
-        ),
+          SafeArea(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                await ref.read(dashboardProvider.notifier).refresh();
+              },
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _HeaderWidget(),
+                    const SizedBox(height: AppSpacing.xl),
+                    
+                    // Main Score Section (Bento Box)
+                    StaggeredGrid.count(
+                      crossAxisCount: 4,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      children: [
+                        // D-Score Gauge (Large)
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 4,
+                          mainAxisCellCount: 3,
+                          child: GlassCard(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.shield_outlined, size: 16, color: AppColors.forestGreen),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Digital Sustainability',
+                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                Expanded(
+                                  child: ModernScoreGauge(score: stats.dscore, size: 220),
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                _ScoreLabel(score: stats.dscore),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // Device Usage (Medium)
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 4,
+                          mainAxisCellCount: 2,
+                          child: OpenContainer(
+                            transitionType: ContainerTransitionType.fadeThrough,
+                            openBuilder: (context, _) => const Scaffold(body: Center(child: Text('Device Usage Details'))),
+                            closedElevation: 0,
+                            closedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                            closedColor: Colors.transparent,
+                            closedBuilder: (context, openContainer) => GlassCard(
+                              onTap: openContainer,
+                              child: _DeviceUsageContent(hours: stats.todayUsageHours),
+                            ),
+                          ),
+                        ),
+
+                        // Carbon Saved (Small)
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 2,
+                          mainAxisCellCount: 2,
+                          child: GlassCard(
+                            opacity: 0.15,
+                            child: _BentoStat(
+                              label: 'Carbon Saved',
+                              value: '${stats.totalSaved.toStringAsFixed(1)}kg',
+                              icon: Icons.eco_outlined,
+                              color: AppColors.leafGreen,
+                            ),
+                          ),
+                        ),
+
+                        // History/Streak (Small)
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 2,
+                          mainAxisCellCount: 2,
+                          child: OpenContainer(
+                            transitionType: ContainerTransitionType.fadeThrough,
+                            openBuilder: (context, _) => const CarbonHistoryPage(),
+                            closedElevation: 0,
+                            closedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                            closedColor: Colors.transparent,
+                            closedBuilder: (context, openContainer) => GlassCard(
+                              onTap: openContainer,
+                              opacity: 0.15,
+                              child: _BentoStat(
+                                label: 'Activity History',
+                                value: '${stats.streakDays}d Streak',
+                                icon: Icons.history_rounded,
+                                color: Colors.orange,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Device Breakdown (Large)
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 4,
+                          mainAxisCellCount: 2,
+                          child: GlassCard(
+                            opacity: 0.1,
+                            child: _DeviceBreakdownWidget(breakdown: stats.deviceBreakdown),
+                          ),
+                        ),
+
+                        // Community Impact (Medium)
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 2,
+                          mainAxisCellCount: 2,
+                          child: GlassCard(
+                            gradient: LinearGradient(
+                              colors: [AppColors.forestGreen.withValues(alpha: 0.8), AppColors.leafGreen.withValues(alpha: 0.8)],
+                            ),
+                            child: _BentoStat(
+                              label: 'Global Trees',
+                              value: stats.globalTreesSaved.toString(),
+                              icon: Icons.park_outlined,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+
+                        // Health Interop: Steps Offset (Medium)
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 2,
+                          mainAxisCellCount: 2,
+                          child: GlassCard(
+                            opacity: 0.2,
+                            child: _BentoStat(
+                              label: 'Steps Offset',
+                              value: '${stats.todaySteps}',
+                              icon: Icons.directions_walk_rounded,
+                              color: AppColors.ecoBlue,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: AppSpacing.xl),
+                    _ImpactEquivalencyList(carbon: stats.todayCarbon),
+                    const SizedBox(height: AppSpacing.xl),
+                    const ActivityCarbonFeed(),
+                    const SizedBox(height: AppSpacing.xl),
+                    const _ManualFootprintSection(),
+                    const SizedBox(height: AppSpacing.xl),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class _HeaderWidget extends ConsumerWidget {
+  const _HeaderWidget();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final prefsAsync = ref.watch(userPreferencesProvider);
+
+    return prefsAsync.when(
+      data: (prefs) {
+        final name = prefs.userName ?? 'Eco Warrior';
+        final hour = DateTime.now().hour;
+        String greeting = 'Good morning';
+        if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
+        if (hour >= 17) greeting = 'Good evening';
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$greeting, $name!',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.forestGreen,
+                      ),
+                ),
+                Text(
+                  'Your digital footprint is lower than average today.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.grey600,
+                      ),
+                ),
+              ],
+            ),
+            const CircleAvatar(
+              radius: 24,
+              backgroundColor: AppColors.forestGreen,
+              child: Icon(Icons.person, color: Colors.white),
+            ),
+          ],
+        );
+      },
+      loading: () => const ShimmerLoading(width: 200, height: 50),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }
@@ -69,242 +295,204 @@ class _LoadingScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.offWhite,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const ShimmerLoading(width: 200, height: 28),
-              const SizedBox(height: AppSpacing.sm),
-              const ShimmerLoading(width: 150, height: 16),
-              const SizedBox(height: AppSpacing.xl),
-              const ShimmerLoading(width: double.infinity, height: 200),
-              const SizedBox(height: AppSpacing.xl),
-              const ShimmerLoading(width: double.infinity, height: 120),
-              const SizedBox(height: AppSpacing.xl),
-              const ShimmerLoading(width: double.infinity, height: 160),
-              const SizedBox(height: AppSpacing.xl),
-              const ShimmerLoading(width: double.infinity, height: 200),
-            ],
-          ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(color: AppColors.forestGreen),
+            const SizedBox(height: AppSpacing.md),
+            Text('Syncing Eco Data...', style: Theme.of(context).textTheme.labelMedium),
+          ],
         ),
       ),
     );
   }
 }
 
-class _HeaderWidget extends StatelessWidget {
-  const _HeaderWidget();
+class _ScoreLabel extends StatelessWidget {
+  final double score;
+  const _ScoreLabel({required this.score});
+
+  @override
+  Widget build(BuildContext context) {
+    String level = 'Excellent';
+    Color color = AppColors.success;
+    if (score < 25) { level = 'Needs Improvement'; color = AppColors.error; }
+    else if (score < 50) { level = 'Average'; color = AppColors.warning; }
+    else if (score < 75) { level = 'Good'; color = AppColors.leafGreen; }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        level,
+        style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12),
+      ),
+    );
+  }
+}
+
+class _BentoStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _BentoStat({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Icon(icon, color: color, size: 28),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'My Eco-Life',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            GestureDetector(
-              onTap: () {},
-              child: Hero(
-                tag: 'profile-pic',
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: AppColors.forestGreen.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.forestGreen, width: 2),
-                  ),
-                  child: const Icon(Icons.person, color: AppColors.forestGreen, size: 24),
-                ),
-              ),
-            ),
+            Text(value, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+            Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.grey600)),
           ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          'Your personal digital footprint summary',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.grey600,
-              ),
         ),
       ],
     );
   }
 }
 
-class _DScoreRingWidget extends StatelessWidget {
-  final double score;
-  const _DScoreRingWidget({required this.score});
-
-  @override
-  Widget build(BuildContext context) {
-    final level = _getScoreLevel(score);
-    final color = _getScoreColor(score);
-    final progress = (score / 100).clamp(0.0, 1.0);
-    return Column(
-      children: [
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            SizedBox(
-              width: 200,
-              height: 200,
-              child: const CircularProgressIndicator(
-                value: 1,
-                strokeWidth: 12,
-                backgroundColor: AppColors.grey200,
-              ),
-            ),
-            SizedBox(
-              width: 200,
-              height: 200,
-              child: CircularProgressIndicator(
-                value: progress,
-                strokeWidth: 12,
-                backgroundColor: Colors.transparent,
-                color: color,
-              ),
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  score.toStringAsFixed(0),
-                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: color,
-                      ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  level,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.grey600,
-                      ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              'Digital Sustainability Score',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: AppColors.grey600,
-                  ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  String _getScoreLevel(double score) {
-    if (score < 25) return 'Needs Improvement';
-    if (score < 50) return 'Average';
-    if (score < 75) return 'Good';
-    return 'Excellent';
-  }
-
-  Color _getScoreColor(double score) {
-    if (score < 25) return AppColors.warning;
-    if (score < 50) return AppColors.grey500;
-    if (score < 75) return AppColors.leafGreen;
-    return AppColors.success;
-  }
-}
-
-class _DeviceUsageWidget extends StatelessWidget {
+class _DeviceUsageContent extends StatelessWidget {
   final double hours;
-  const _DeviceUsageWidget({required this.hours});
+  const _DeviceUsageContent({required this.hours});
 
   @override
   Widget build(BuildContext context) {
-    return EcoCard(
-      onTap: null,
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.ecoBlue.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.phone_android, color: AppColors.ecoBlue),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Device Usage', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+              Text('Based on active screen time', style: Theme.of(context).textTheme.labelSmall),
+            ],
+          ),
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text('${hours.toStringAsFixed(1)}h', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.ecoBlue, fontWeight: FontWeight.bold)),
+            const Text('Today', style: TextStyle(fontSize: 10, color: AppColors.grey600)),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _DeviceBreakdownWidget extends StatelessWidget {
+  final Map<String, double> breakdown;
+  const _DeviceBreakdownWidget({required this.breakdown});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: AppColors.leafGreen.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.phone_android, color: AppColors.leafGreen, size: 32),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Device Usage', style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      '${hours.toStringAsFixed(1)} active hours today',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.grey600),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                '${hours.toStringAsFixed(1)}h',
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.leafGreen,
-                    ),
-              ),
+              Text('Usage Breakdown',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+              const Icon(Icons.pie_chart_outline, size: 16, color: AppColors.grey600),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Screen Time', style: Theme.of(context).textTheme.labelSmall),
-                    Text('2h 30m', style: Theme.of(context).textTheme.titleSmall),
-                  ],
+          const SizedBox(height: AppSpacing.sm),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: breakdown.entries.take(3).map((e) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2.0),
+                        child: Row(
+                          children: [
+                            Container(width: 8, height: 8, decoration: BoxDecoration(color: _getColorFor(e.key), shape: BoxShape.circle)),
+                            const SizedBox(width: 8),
+                            Expanded(child: Text(e.key, style: const TextStyle(fontSize: 10))),
+                            Text('${(e.value * 100).toStringAsFixed(0)}%', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Apps Used', style: Theme.of(context).textTheme.labelSmall),
-                    Text('12 apps', style: Theme.of(context).textTheme.titleSmall),
-                  ],
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  flex: 2,
+                  child: LayoutBuilder(builder: (context, constraints) {
+                    final size = constraints.maxWidth < constraints.maxHeight ? constraints.maxWidth : constraints.maxHeight;
+                    return Center(
+                      child: SizedBox(
+                        width: size,
+                        height: size,
+                        child: Stack(
+                          children: [
+                            CircularProgressIndicator(
+                              value: breakdown.values.fold(0.0, (a, b) => a + b) / 1,
+                              strokeWidth: 8,
+                              backgroundColor: AppColors.grey200,
+                              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.forestGreen),
+                            ),
+                            Center(
+                              child: Text(
+                                '${breakdown.length}',
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
     );
+  }
+
+  Color _getColorFor(String key) {
+    switch (key.toLowerCase()) {
+      case 'video': return Colors.red;
+      case 'social': return Colors.purple;
+      case 'work': return Colors.blue;
+      default: return AppColors.leafGreen;
+    }
   }
 }
 
@@ -321,10 +509,13 @@ class _ManualFootprintState extends ConsumerState<_ManualFootprintSection> {
   final TextEditingController _valueController = TextEditingController();
   String _selectedActivity = '';
   List<CarbonRecord> _recentRecords = [];
+  double _previewCarbon = 0.0;
 
   static const List<String> _activityOptions = [
     'Email',
     'Search',
+    'AI Search',
+    'AI Image Gen',
     'Cloud Storage',
     'Social Media',
     'Gaming',
@@ -332,12 +523,15 @@ class _ManualFootprintState extends ConsumerState<_ManualFootprintSection> {
     'Video Streaming',
     'Video Call',
     'File Download',
-    'Website Browsing',
+    'Ecommerce Order',
+    'Crypto Transaction',
   ];
 
   static const Map<String, String> _unitOptions = {
     'Email': 'emails',
     'Search': 'searches',
+    'AI Search': 'prompts',
+    'AI Image Gen': 'images',
     'Cloud Storage': 'GB',
     'Social Media': 'hours',
     'Gaming': 'hours',
@@ -345,25 +539,43 @@ class _ManualFootprintState extends ConsumerState<_ManualFootprintSection> {
     'Video Streaming': 'hours',
     'Video Call': 'hours',
     'File Download': 'GB',
-    'Website Browsing': 'minutes',
+    'Ecommerce Order': 'orders',
+    'Crypto Transaction': 'transactions',
   };
 
   @override
   void initState() {
     super.initState();
     _loadRecentRecords();
+    _valueController.addListener(_updatePreview);
+  }
+
+  void _updatePreview() {
+    final value = double.tryParse(_valueController.text);
+    if (value != null && _selectedActivity.isNotEmpty) {
+      setState(() {
+        _previewCarbon = _calculateRecord(_selectedActivity, value).carbonValue;
+      });
+    } else {
+      setState(() {
+        _previewCarbon = 0.0;
+      });
+    }
   }
 
   Future<void> _loadRecentRecords() async {
-    final repo = await ref.watch(carbonRepositoryProvider.future);
+    final repo = await ref.read(carbonRepositoryProvider.future);
     final records = await repo.getAllRecords();
-    setState(() {
-      _recentRecords = records.take(5).toList();
-    });
+    if (mounted) {
+      setState(() {
+        _recentRecords = records.take(5).toList();
+      });
+    }
   }
 
   @override
   void dispose() {
+    _valueController.removeListener(_updatePreview);
     _valueController.dispose();
     super.dispose();
   }
@@ -382,11 +594,16 @@ class _ManualFootprintState extends ConsumerState<_ManualFootprintSection> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String>(
-                value: _selectedActivity.isNotEmpty ? _selectedActivity : null,
+                initialValue: _selectedActivity.isNotEmpty ? _selectedActivity : null,
                 items: _activityOptions
                     .map((option) => DropdownMenuItem(value: option, child: Text(option)))
                     .toList(),
-                onChanged: (value) => setState(() => _selectedActivity = value ?? ''),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedActivity = value ?? '';
+                    _updatePreview();
+                  });
+                },
                 decoration: const InputDecoration(
                   labelText: 'Select Activity',
                   border: OutlineInputBorder(),
@@ -394,32 +611,55 @@ class _ManualFootprintState extends ConsumerState<_ManualFootprintSection> {
               ),
               const SizedBox(height: AppSpacing.md),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: TextFormField(
-                      controller: _valueController,
-                      decoration: InputDecoration(
-                        labelText: 'Value (${_unitOptions[_selectedActivity] ?? ''})',
-                        border: const OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _valueController,
+                          decoration: InputDecoration(
+                            labelText: 'Value (${_unitOptions[_selectedActivity] ?? ''})',
+                            border: const OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
+                        ),
+                        if (_previewCarbon > 0)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              'Estimated: ${_previewCarbon.toStringAsFixed(3)} kg CO2e',
+                              style: const TextStyle(
+                                color: AppColors.forestGreen,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate() && _selectedActivity.isNotEmpty) {
-                        HapticFeedback.lightImpact();
+                        unawaited(HapticFeedback.lightImpact());
                         final value = double.tryParse(_valueController.text) ?? 0;
                         final record = _calculateRecord(_selectedActivity, value);
 
-                        final repo = await ref.watch(carbonRepositoryProvider.future);
+                        final repo = await ref.read(carbonRepositoryProvider.future);
                         await repo.saveRecord(record);
+
+                        ref.invalidate(carbonRecordsStreamProvider);
+                        if (mounted) {
+                          await ref.read(dashboardProvider.notifier).refresh();
+                        }
 
                         setState(() {
                           _recentRecords.insert(0, record);
                           if (_recentRecords.length > 5) _recentRecords.removeLast();
                           _valueController.clear();
+                          _previewCarbon = 0.0;
                         });
                       }
                     },
@@ -432,7 +672,7 @@ class _ManualFootprintState extends ConsumerState<_ManualFootprintSection> {
                 const Text('Recent Calculations:',
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: AppSpacing.sm),
-                ..._recentRecords.map((r) => _CarbonRecordTile(record: r)).toList(),
+                ..._recentRecords.map((r) => _CarbonRecordTile(record: r)),
               ],
             ],
           ),
@@ -446,7 +686,11 @@ class _ManualFootprintState extends ConsumerState<_ManualFootprintSection> {
       case 'Email':
         return CarbonCalculator.calculateEmail(count: value.toInt(), hasAttachment: false);
       case 'Search':
-        return CarbonCalculator.calculateSearch(searchCount: value.toInt());
+        return CarbonCalculator.calculateSearch(searchCount: value.toInt(), isAI: false);
+      case 'AI Search':
+        return CarbonCalculator.calculateSearch(searchCount: value.toInt(), isAI: true);
+      case 'AI Image Gen':
+        return CarbonCalculator.calculateAIUsage(promptCount: value.toInt(), isImageGeneration: true);
       case 'Cloud Storage':
         return CarbonCalculator.calculateCloudStorage(gbStored: value, gbTransferred: value * 2);
       case 'Social Media':
@@ -461,8 +705,10 @@ class _ManualFootprintState extends ConsumerState<_ManualFootprintSection> {
         return CarbonCalculator.calculateVideoCall(hours: value, quality: 'HD');
       case 'File Download':
         return CarbonCalculator.calculateFileDownload(gb: value);
-      case 'Website Browsing':
-        return CarbonCalculator.calculateWebBrowsing(minutes: value);
+      case 'Ecommerce Order':
+        return CarbonCalculator.calculateEcommerce(orderCount: value.toInt());
+      case 'Crypto Transaction':
+        return CarbonCalculator.calculateCrypto(transactionCount: value, currency: 'BTC');
       default:
         return CarbonCalculator.calculateDeviceEnergy(watts: value, hours: 1);
     }
@@ -500,49 +746,6 @@ class _CarbonRecordTile extends StatelessWidget {
         ),
         trailing: const Icon(Icons.chevron_right, size: 20),
       ),
-    );
-  }
-}
-
-class _AnalyticsSummaryWidget extends StatelessWidget {
-  final DashboardStats stats;
-  const _AnalyticsSummaryWidget({required this.stats});
-
-  @override
-  Widget build(BuildContext context) {
-    return EcoCard(
-      onTap: null,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Weekly Summary', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: AppSpacing.md),
-          Row(
-            children: [
-              _SummaryItem(label: 'Weekly Change', value: '${stats.weeklyChange.toStringAsFixed(1)}kg'),
-              const SizedBox(width: AppSpacing.md),
-              _SummaryItem(label: 'Streak', value: '${stats.streakDays} days'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SummaryItem extends StatelessWidget {
-  final String label;
-  final String value;
-  const _SummaryItem({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 10, color: AppColors.grey600)),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-      ],
     );
   }
 }

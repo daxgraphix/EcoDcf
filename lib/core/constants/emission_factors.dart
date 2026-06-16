@@ -23,14 +23,24 @@ class EmissionFactors {
   static const double emailStandard = 0.004;    // 4g
   static const double emailWithAttachment = 0.050; // 50g (depends on size)
 
-  /// AI Operations (kg CO2e / query)
-  /// Source: Estimates for GPT-3 class models (varies by model size and data center efficiency)
-  /// Research from Luccioni et al. (2023) suggests ~0.001 - 0.006 kg per 1000 tokens.
-  static const double aiPromptAverage = 0.0015; // 1.5g per prompt/completion
-
   /// Search Engine (kg CO2e / search)
   /// Source: Google Environmental Report
   static const double searchGoogle = 0.0002; // 0.2g
+  static const double searchAI = 0.004;      // 4g (Generative AI search is ~20x traditional)
+
+  /// AI Usage (kg CO2e / prompt)
+  /// Source: Various studies on LLM energy consumption (e.g., Luccioni et al. 2023)
+  static const double aiPromptAverage = 0.002; // 2g per prompt
+  static const double aiImageGeneration = 0.01; // 10g per image
+
+  /// E-commerce & Logistics (kg CO2e / order)
+  /// Average last-mile delivery and packaging
+  static const double ecommerceOrder = 0.5;
+
+  /// Cryptocurrency (kg CO2e / transaction)
+  /// Note: Highly variable based on network (Proof of Work vs Proof of Stake)
+  static const double cryptoBitcoin = 400.0; // High estimate for BTC
+  static const double cryptoEthereum = 0.01; // Post-Merge estimate
 
   /// Embodied Carbon (Manufacturing/Transport/End-of-life)
   /// Source: Apple/Samsung Environmental Reports

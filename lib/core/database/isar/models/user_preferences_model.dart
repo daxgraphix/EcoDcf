@@ -13,6 +13,7 @@ class UserPreferencesModel {
   String? themeMode; // 'light', 'dark', 'system'
 
   bool notificationsEnabled = true;
+  bool remindersEnabled = true;
 
   // Accessibility
   double fontSizeScale = 1.0;

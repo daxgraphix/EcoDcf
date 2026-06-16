@@ -58,6 +58,8 @@ class CarbonCalculator {
         factor = EmissionFactors.streamingHD;
       case 'SD':
         factor = EmissionFactors.streamingSD;
+      case '4K':
+        factor = EmissionFactors.streaming4K;
       default:
         factor = EmissionFactors.streamingSD;
     }
@@ -79,8 +81,10 @@ class CarbonCalculator {
 
   static CarbonRecord calculateAIUsage({
     required int promptCount,
+    bool isImageGeneration = false,
   }) {
-    final kgCO2 = promptCount * EmissionFactors.aiPromptAverage;
+    final factor = isImageGeneration ? EmissionFactors.aiImageGeneration : EmissionFactors.aiPromptAverage;
+    final kgCO2 = promptCount * factor;
 
     return CarbonRecord(
       id: const Uuid().v4(),
@@ -90,6 +94,7 @@ class CarbonCalculator {
       createdAt: DateTime.now(),
       metadata: {
         'prompts': promptCount,
+        'isImage': isImageGeneration,
       },
     );
   }
@@ -116,8 +121,10 @@ class CarbonCalculator {
 
   static CarbonRecord calculateSearch({
     required int searchCount,
+    bool isAI = false,
   }) {
-    final kgCO2 = searchCount * EmissionFactors.searchGoogle;
+    final factor = isAI ? EmissionFactors.searchAI : EmissionFactors.searchGoogle;
+    final kgCO2 = searchCount * factor;
 
     return CarbonRecord(
       id: const Uuid().v4(),
@@ -127,6 +134,7 @@ class CarbonCalculator {
       createdAt: DateTime.now(),
       metadata: {
         'searchCount': searchCount,
+        'isAI': isAI,
       },
     );
   }
@@ -280,5 +288,41 @@ class CarbonCalculator {
       },
     );
   }
-}
 
+  static CarbonRecord calculateEcommerce({
+    required int orderCount,
+  }) {
+    final kgCO2 = orderCount * EmissionFactors.ecommerceOrder;
+
+    return CarbonRecord(
+      id: const Uuid().v4(),
+      type: 'ecommerce',
+      carbonValue: kgCO2,
+      unit: 'kg CO2e',
+      createdAt: DateTime.now(),
+      metadata: {
+        'orderCount': orderCount,
+      },
+    );
+  }
+
+  static CarbonRecord calculateCrypto({
+    required double transactionCount,
+    required String currency,
+  }) {
+    final factor = currency.toUpperCase() == 'BTC' ? EmissionFactors.cryptoBitcoin : EmissionFactors.cryptoEthereum;
+    final kgCO2 = transactionCount * factor;
+
+    return CarbonRecord(
+      id: const Uuid().v4(),
+      type: 'crypto',
+      carbonValue: kgCO2,
+      unit: 'kg CO2e',
+      createdAt: DateTime.now(),
+      metadata: {
+        'transactions': transactionCount,
+        'currency': currency,
+      },
+    );
+  }
+}

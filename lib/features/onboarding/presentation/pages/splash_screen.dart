@@ -13,11 +13,13 @@ class SplashScreen extends ConsumerWidget {
 
     prefsAsync.when(
       data: (prefs) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (prefs.hasCompletedOnboarding) {
-            context.go('/main');
-          } else {
-            context.go('/onboarding');
+        Future.delayed(const Duration(seconds: 3), () {
+          if (context.mounted) {
+            if (prefs.hasCompletedOnboarding) {
+              context.go('/main');
+            } else {
+              context.go('/onboarding');
+            }
           }
         });
       },
@@ -25,7 +27,9 @@ class SplashScreen extends ConsumerWidget {
       error: (err, _) {},
     );
 
-    return const _SplashContent();
+    return const Scaffold(
+      body: _SplashContent(),
+    );
   }
 }
 
@@ -46,14 +50,14 @@ class _SplashContentState extends State<_SplashContent>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(seconds: 2),
+      duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
     );
     _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: const ThresholdCurve(0.3)),
+      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.6, curve: Curves.easeIn)),
     );
     _controller.forward();
   }
@@ -66,113 +70,87 @@ class _SplashContentState extends State<_SplashContent>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Stack(
-          children: [
-            Positioned.fill(
-              child: Transform.scale(
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.forestGreen, AppColors.leafGreen],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Transform.scale(
                 scale: _scaleAnimation.value,
                 child: Opacity(
                   opacity: _opacityAnimation.value,
-                  child: const _LogoWidget(),
+                  child: Container(
+                    width: 140,
+                    height: 140,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 30,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.co2,
+                      color: AppColors.forestGreen,
+                      size: 80,
+                    ),
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              bottom: 60,
-              left: 0,
-              right: 0,
-              child: Opacity(
+              const SizedBox(height: 32),
+              Opacity(
                 opacity: _opacityAnimation.value,
-                child: const _LoadingIndicator(),
+                child: const Column(
+                  children: [
+                    Text(
+                      'EcoDcf',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 42,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'DIGITAL CARBON INTELLIGENCE',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 3,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _LogoWidget extends StatelessWidget {
-  const _LogoWidget();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 20,
-                spreadRadius: 2,
+              const SizedBox(height: 80),
+              const SizedBox(
+                width: 40,
+                height: 40,
+                child: CircularProgressIndicator(
+                  color: Colors.white70,
+                  strokeWidth: 3,
+                ),
               ),
             ],
-          ),
-          child: const Icon(
-            Icons.co2,
-            color: AppColors.forestGreen,
-            size: 64,
-          ),
-        ),
-        const SizedBox(height: 24),
-        const Text(
-          'EcoDcf',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 36,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Digital Carbon Intelligence',
-          style: TextStyle(
-            color: Colors.white70,
-            fontSize: 16,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-      ],
+          );
+        },
+      ),
     );
   }
-}
-
-class _LoadingIndicator extends StatelessWidget {
-  const _LoadingIndicator();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        CircularProgressIndicator(
-          color: Colors.white,
-          strokeWidth: 2,
-        ),
-        SizedBox(height: 12),
-        Text(
-          'Loading...',
-          style: TextStyle(color: Colors.white70, fontSize: 14),
-        ),
-      ],
-    );
-  }
-}
-
-class ThresholdCurve extends Curve {
-  const ThresholdCurve(this.threshold);
-  final double threshold;
-
-  @override
-  double transform(double t) => t < threshold ? 0.0 : 1.0;
 }

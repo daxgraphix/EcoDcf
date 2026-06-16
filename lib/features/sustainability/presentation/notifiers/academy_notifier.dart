@@ -12,10 +12,6 @@ class AcademyNotifier extends Notifier<AcademyState> {
   @override
   AcademyState build() {
     _repository = ref.watch(sustainabilityRepositoryProvider);
-    
-    // Initial fetch
-    _loadInitialData();
-
     return AcademyState(
       lessons: [],
       categories: [],
@@ -32,6 +28,10 @@ class AcademyNotifier extends Notifier<AcademyState> {
       lessons: lessons,
       isLoading: false,
     );
+  }
+
+  Future<void> init() async {
+    await _loadInitialData();
   }
 
   Future<void> refresh() async {

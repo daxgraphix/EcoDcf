@@ -14,8 +14,7 @@ import 'package:ecodcf/features/sustainability/presentation/pages/academy_page.d
 import 'package:ecodcf/features/sustainability/presentation/pages/lesson_detail_page.dart';
 import 'package:ecodcf/features/onboarding/presentation/pages/permissions_onboarding_page.dart';
 import 'package:ecodcf/features/report/presentation/pages/report_page.dart';
-import 'package:ecodcf/features/gamification/presentation/pages/badges_page.dart';
-import 'package:ecodcf/features/gamification/presentation/pages/activity_history_page.dart';
+import 'package:ecodcf/features/carbon/presentation/pages/carbon_history_page.dart';
 import 'package:ecodcf/features/onboarding/presentation/pages/onboarding_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -119,14 +118,9 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const ReportPage(),
     ),
     GoRoute(
-      path: AppRoutes.badges,
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const BadgesPage(),
-    ),
-    GoRoute(
       path: AppRoutes.activityHistory,
       parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const ActivityHistoryPage(),
+      builder: (context, state) => const CarbonHistoryPage(),
     ),
   ],
 );

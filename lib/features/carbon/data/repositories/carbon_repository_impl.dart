@@ -31,8 +31,12 @@ class CarbonRepositoryImpl implements CarbonRepository {
 
   @override
   Future<void> saveRecord(CarbonRecord record) async {
-    final model = CarbonRecordModel.fromEntity(record);
     await _isar.writeTxn(() async {
+      final existingModel = await _isar.carbonRecordModels.filter().remoteIdEqualTo(record.id).findFirst();
+      final model = CarbonRecordModel.fromEntity(record);
+      if (existingModel != null) {
+        model.id = existingModel.id;
+      }
       await _isar.carbonRecordModels.put(model);
     });
   }
