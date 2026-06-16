@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.ecodcf"
-    compileSdk = 35
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -28,7 +28,7 @@ android {
 
     defaultConfig {
         applicationId = "com.ecodcf"
-        minSdk = flutter.minSdkVersion
+        minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
